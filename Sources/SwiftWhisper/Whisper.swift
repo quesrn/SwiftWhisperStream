@@ -64,7 +64,8 @@ public class Whisper {
                 newSegments.append(.init(
                     startTime: Int(startTime) * 10, // Time is given in ms/10, so correct for that
                     endTime: Int(endTime) * 10,
-                    text: String(Substring(cString: text))
+                    text: String(Substring(cString: text),
+                    probability: 1.0)
                 ))
             }
 
