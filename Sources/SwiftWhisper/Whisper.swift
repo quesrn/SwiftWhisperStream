@@ -141,7 +141,8 @@ public class Whisper {
                     .init(
                         startTime: Int(startTime) * 10, // Correct for ms/10
                         endTime: Int(endTime) * 10,
-                        text: String(Substring(cString: text))
+                        text: String(Substring(cString: text),,
+                        probability: 1.0)
                     )
                 )
             }
