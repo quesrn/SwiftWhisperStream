@@ -7,21 +7,24 @@ public class Whisper {
 
     public var delegate: WhisperDelegate?
     public var params: WhisperParams
+    public var segmentProbability: ((TokenSequence) -> Float)?
     public private(set) var inProgress = false
 
     internal var frameCount: Int? // For progress calculation (value not in `whisper_state` yet)
     internal var cancelCallback: (() -> Void)?
 
-    public init(fromFileURL fileURL: URL, withParams params: WhisperParams = .default) {
+    public init(fromFileURL fileURL: URL, withParams params: WhisperParams = .default, segmentProbability: ((TokenSequence) -> Float)? = nil) {
         self.whisperContext = fileURL.relativePath.withCString { whisper_init_from_file($0) }
         self.params = params
+        self.segmentProbability = segmentProbability
     }
 
-    public init(fromData data: Data, withParams params: WhisperParams = .default) {
+    public init(fromData data: Data, withParams params: WhisperParams = .default, segmentProbability: ((TokenSequence) -> Float)? = nil) {
         var copy = data // Need to copy memory so we can gaurentee exclusive ownership over pointer
 
         self.whisperContext = copy.withUnsafeMutableBytes { whisper_init_from_buffer($0.baseAddress!, data.count) }
         self.params = params
+        self.segmentProbability = segmentProbability
     }
 
     deinit {
@@ -60,13 +63,20 @@ public class Whisper {
                 guard let text = whisper_full_get_segment_text(ctx, index) else { continue }
                 let startTime = whisper_full_get_segment_t0(ctx, index)
                 let endTime = whisper_full_get_segment_t1(ctx, index)
+                let probability: Float
+
+                if let segmentProbability = whisper.segmentProbability {
+                    probability = segmentProbability(TokenSequence(whisperContext: ctx, segmentIndex: index))
+                } else {
+                    probability = 1.0
+                }
 
                 newSegments.append(.init(
                     startTime: Int(startTime) * 10, // Time is given in ms/10, so correct for that
                     endTime: Int(endTime) * 10,
-                    text: String(Substring(cString: text),
-                    probability: Float(1.0))
-                ))
+                    text: String(Substring(cString: text)),
+                    probability: probability)
+                )
             }
 
             DispatchQueue.main.async {
@@ -105,7 +115,7 @@ public class Whisper {
     }
 
     public func transcribe(audioFrames: [Float], completionHandler: @escaping (Result<[Segment], Error>) -> Void) {
-//        prepareCallbacks()
+        prepareCallbacks()
 
         let wrappedCompletionHandler: (Result<[Segment], Error>) -> Void = { result in
             self.cleanupCallbacks()
@@ -136,14 +146,19 @@ public class Whisper {
                 guard let text = whisper_full_get_segment_text(self.whisperContext, index) else { continue }
                 let startTime = whisper_full_get_segment_t0(self.whisperContext, index)
                 let endTime = whisper_full_get_segment_t1(self.whisperContext, index)
+                let probability: Float
 
-                segments.append(
-                    .init(
-                        startTime: Int(startTime) * 10, // Correct for ms/10
-                        endTime: Int(endTime) * 10,
-                        text: String(Substring(cString: text),
-                        probability: Float(1.0))
-                    )
+                if let segmentProbability = self.segmentProbability {
+                    probability = segmentProbability(TokenSequence(whisperContext: self.whisperContext, segmentIndex: index))
+                } else {
+                    probability = 1.0
+                }
+
+                segments.append(.init(
+                    startTime: Int(startTime) * 10, // Correct for ms/10
+                    endTime: Int(endTime) * 10,
+                    text: String(Substring(cString: text)),
+                    probability: probability)
                 )
             }
 
