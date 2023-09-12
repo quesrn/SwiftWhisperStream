@@ -104,7 +104,7 @@ public class Whisper {
     }
 
     public func transcribe(audioFrames: [Float], completionHandler: @escaping (Result<[Segment], Error>) -> Void) {
-        prepareCallbacks()
+//        prepareCallbacks()
 
         let wrappedCompletionHandler: (Result<[Segment], Error>) -> Void = { result in
             self.cleanupCallbacks()
