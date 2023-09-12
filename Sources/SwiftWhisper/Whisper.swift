@@ -65,7 +65,7 @@ public class Whisper {
                     startTime: Int(startTime) * 10, // Time is given in ms/10, so correct for that
                     endTime: Int(endTime) * 10,
                     text: String(Substring(cString: text),
-                    probability: 1.0)
+                    probability: Float(1.0))
                 ))
             }
 
@@ -142,7 +142,7 @@ public class Whisper {
                         startTime: Int(startTime) * 10, // Correct for ms/10
                         endTime: Int(endTime) * 10,
                         text: String(Substring(cString: text),
-                        probability: 1.0)
+                        probability: Float(1.0))
                     )
                 )
             }
