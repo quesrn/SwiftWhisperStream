@@ -14,19 +14,22 @@ public class Whisper {
     internal var frameCount: Int? // For progress calculation (value not in `whisper_state` yet)
     internal var cancelCallback: (() -> Void)?
 
-    public init(
+    public init?(
         fromFileURL fileURL: URL,
         withParams params: WhisperParams = .default,
         newSegmentProbability: ((TokenSequence) -> Float)? = nil,
         completeSegmentProbability: ((TokenSequence) -> Float)? = nil)
     {
-        self.whisperContext = fileURL.relativePath.withCString { whisper_init_from_file($0) }
+         guard let context = (fileURL.relativePath.withCString { whisper_init_from_file($0) }) else {
+            return nil
+        }
+        self.whisperContext = context
         self.params = params
         self.newSegmentProbability = newSegmentProbability
         self.completeSegmentProbability = completeSegmentProbability
     }
 
-    public init(
+    public init?(
         fromData data: Data,
         withParams params: WhisperParams = .default,
         newSegmentProbability: ((TokenSequence) -> Float)? = nil,
@@ -34,7 +37,10 @@ public class Whisper {
     {
         var copy = data // Need to copy memory so we can gaurentee exclusive ownership over pointer
 
-        self.whisperContext = copy.withUnsafeMutableBytes { whisper_init_from_buffer($0.baseAddress!, data.count) }
+        guard let context = (copy.withUnsafeMutableBytes { 
+            whisper_init_from_buffer($0.baseAddress!, data.count) }) else { return nil }
+
+        self.whisperContext = context
         self.params = params
         self.newSegmentProbability = newSegmentProbability
         self.completeSegmentProbability = completeSegmentProbability
