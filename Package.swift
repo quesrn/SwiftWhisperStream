@@ -10,12 +10,24 @@ exclude.append("coreml")
 
 let package = Package(
     name: "SwiftWhisper",
+    platforms: [
+        .macOS(.v12),
+        .iOS(.v15),
+        .tvOS(.v13),
+    ],
     products: [
         .library(name: "SwiftWhisper", targets: ["SwiftWhisper"])
     ],
+    dependencies: [
+        .package(url: "https://github.com/ctreffs/SwiftSDL2.git", from: "1.4.0")
+    ],
     targets: [
         .target(name: "SwiftWhisper", dependencies: [.target(name: "whisper_cpp")]),
-        .target(name: "LibWhisper"),
+        .target(name: "SwiftWhisperStream", dependencies: [.target(name: "whisper_cpp"), .target(name: "LibWhisper")]),
+        .target(name: "LibWhisper", dependencies: [
+            .target(name: "whisper_cpp"),
+            .product(name: "SDL", package: "SwiftSDL2"),
+        ]),
         .target(name: "whisper_cpp",
                 exclude: exclude,
                 cSettings: [
@@ -26,6 +38,5 @@ let package = Package(
                 ]),
         .testTarget(name: "WhisperTests", dependencies: [.target(name: "SwiftWhisper")], resources: [.copy("TestResources/")])
     ],
-    cxxLanguageStandard: CXXLanguageStandard.cxx11
+    cxxLanguageStandard: CXXLanguageStandard.cxx20
 )
-

@@ -1,3 +1,6 @@
+import LibWhisper
+//import SDL2
+
 public enum CaptureDeviceError: Error {
     case sdlErrorCode(Int32)
 }

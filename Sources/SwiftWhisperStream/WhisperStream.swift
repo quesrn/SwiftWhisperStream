@@ -1,4 +1,5 @@
 import AVFoundation
+import LibWhisper
 
 public struct Segment {
     let text: String
