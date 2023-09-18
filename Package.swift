@@ -15,6 +15,7 @@ let package = Package(
     ],
     targets: [
         .target(name: "SwiftWhisper", dependencies: [.target(name: "whisper_cpp")]),
+        .target(name: "LibWhisper"),
         .target(name: "whisper_cpp",
                 exclude: exclude,
                 cSettings: [
