@@ -36,14 +36,17 @@ let package = Package(
             exclude: exclude,
             publicHeadersPath: "include",
             cSettings: [
-//                .define("GGML_USE_ACCELERATE", .when(platforms: [.macOS, .macCatalyst, .iOS])),
-                .define("WHISPER_USE_COREML", .when(platforms: [.macOS, .macCatalyst, .iOS])),
-//                .define("GGML_USE_METAL", .when(platforms: [.macOS, .macCatalyst, .iOS])),
+                .define("GGML_USE_ACCELERATE", .when(platforms: [.macOS, .macCatalyst, .iOS])),
+//                .define("WHISPER_USE_COREML", .when(platforms: [.macOS, .macCatalyst, .iOS])),
+                .define("GGML_USE_METAL", .when(platforms: [.macOS, .macCatalyst, .iOS])),
 //                .unsafeFlags(["-DGGML_USE_METAL"]),
 //                .unsafeFlags(["-DGGML_USE_ACCELERATE"]),
 //                    .define("GGML_USE_METAL", .when(platforms: [.macOS, .macCatalyst, .iOS])),
-                .define("WHISPER_COREML_ALLOW_FALLBACK", .when(platforms: [.macOS, .macCatalyst, .iOS])),
-                .unsafeFlags(["-O3"])
+//                .define("WHISPER_COREML_ALLOW_FALLBACK", .when(platforms: [.macOS, .macCatalyst, .iOS])),
+                .unsafeFlags(["-O3"]),
+                .unsafeFlags(["-DNDEBUG"]),
+                .unsafeFlags(["-pthread"]),
+                .unsafeFlags(["-fno-objc-arc"]),
             ]),
         .testTarget(name: "WhisperTests", dependencies: [.target(name: "SwiftWhisper")], resources: [.copy("TestResources/")])
     ],
