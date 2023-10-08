@@ -34,6 +34,9 @@ let package = Package(
                 .product(name: "SDL", package: "SwiftSDL2"),
             ], 
             exclude: exclude,
+            resources: [
+                .process("ggml-metal.metal"),
+            ],
             publicHeadersPath: "include",
             cSettings: [
                 .define("GGML_USE_ACCELERATE", .when(platforms: [.macOS, .macCatalyst, .iOS])),
