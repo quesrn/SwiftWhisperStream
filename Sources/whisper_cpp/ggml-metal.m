@@ -149,72 +149,60 @@ struct ggml_metal_context * ggml_metal_init(int n_cb) {
     ctx->concur_list_len = 0;
 
     ctx->d_queue = dispatch_queue_create("ggml-metal", DISPATCH_QUEUE_CONCURRENT);
-
-#ifdef GGML_SWIFT
-    // load the default.metallib file
+    
+    // load library
     {
-        NSError * error = nil;
-
-        NSBundle * bundle = [NSBundle bundleForClass:[GGMLMetalClass class]];
-        NSString * llamaBundlePath = [bundle pathForResource:@"llama_llama" ofType:@"bundle"];
-        NSBundle * llamaBundle = [NSBundle bundleWithPath:llamaBundlePath];
-        NSString * libPath = [llamaBundle pathForResource:@"default" ofType:@"metallib"];
-        NSURL * libURL = [NSURL fileURLWithPath:libPath];
-
-        // Load the metallib file into a Metal library
-        ctx->library = [ctx->device newLibraryWithURL:libURL error:&error];
-
-        if (error) {
-            metal_printf("%s: error: %s\n", __func__, [[error description] UTF8String]);
-            return NULL;
-        }
-    }
+        NSBundle * bundle = nil;
+#ifdef SWIFT_PACKAGE
+        bundle = SWIFTPM_MODULE_BUNDLE;
 #else
-    UNUSED(msl_library_source);
-
-    // read the source from "ggml-metal.metal" into a string and use newLibraryWithSource
-    {
+        bundle = [NSBundle bundleForClass:[GGMLMetalClass class]];
+#endif
         NSError * error = nil;
-
-        //NSString * path = [[NSBundle mainBundle] pathForResource:@"../../examples/metal/metal" ofType:@"metal"];
-        NSBundle * bundle = [NSBundle bundleForClass:[GGMLMetalClass class]];
-        NSString * path   = [bundle pathForResource:@"ggml-metal" ofType:@"metal"];
-        metal_printf("%s: loading '%s'\n", __func__, [path UTF8String]);
-
-        NSString * src  = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:&error];
-        if (error) {
-            metal_printf("%s: error: %s\n", __func__, [[error description] UTF8String]);
-            return NULL;
-        }
-
+        NSString * libPath = [bundle pathForResource:@"default" ofType:@"metallib"];
+        if (libPath != nil) {
+            NSURL * libURL = [NSURL fileURLWithPath:libPath];
+            metal_printf("%s: loading '%s'\n", __func__, [libPath UTF8String]);
+            ctx->library = [ctx->device newLibraryWithURL:libURL error:&error];
+        } else {
+            metal_printf("%s: default.metallib not found, loading from source\n", __func__);
+            
+            NSString * sourcePath = [bundle pathForResource:@"ggml-metal" ofType:@"metal"];
+            metal_printf("%s: loading '%s'\n", __func__, [sourcePath UTF8String]);
+            NSString * src = [NSString stringWithContentsOfFile:sourcePath encoding:NSUTF8StringEncoding error:&error];
+            if (error) {
+                metal_printf("%s: error: %s\n", __func__, [[error description] UTF8String]);
+                return NULL;
+            }
+            
+            MTLCompileOptions* options = nil;
 #ifdef GGML_QKK_64
-        MTLCompileOptions* options = [MTLCompileOptions new];
-        options.preprocessorMacros = @{ @"QK_K" : @(64) };
-        ctx->library = [ctx->device newLibraryWithSource:src options:options error:&error];
-#else
-        ctx->library = [ctx->device newLibraryWithSource:src options:nil error:&error];
+            options = [MTLCompileOptions new];
+            options.preprocessorMacros = @{ @"QK_K" : @(64) };
 #endif
+            ctx->library = [ctx->device newLibraryWithSource:src options:options error:&error];
+        }
+        
         if (error) {
             metal_printf("%s: error: %s\n", __func__, [[error description] UTF8String]);
             return NULL;
         }
     }
-#endif
-
+    
     // load kernels
     {
         NSError * error = nil;
 #define GGML_METAL_ADD_KERNEL(name) \
-        ctx->function_##name = [ctx->library newFunctionWithName:@"kernel_"#name]; \
-        ctx->pipeline_##name = [ctx->device newComputePipelineStateWithFunction:ctx->function_##name error:&error]; \
-        metal_printf("%s: loaded %-32s %16p | th_max = %4d | th_width = %4d\n", __func__, "kernel_"#name, (void *) ctx->pipeline_##name, \
-                (int) ctx->pipeline_##name.maxTotalThreadsPerThreadgroup, \
-                (int) ctx->pipeline_##name.threadExecutionWidth); \
-        if (error) { \
-            metal_printf("%s: load pipeline error: %s\n", __func__, [[error description] UTF8String]); \
-            return NULL; \
-        }
-
+ctx->function_##name = [ctx->library newFunctionWithName:@"kernel_"#name]; \
+ctx->pipeline_##name = [ctx->device newComputePipelineStateWithFunction:ctx->function_##name error:&error]; \
+metal_printf("%s: loaded %-32s %16p | th_max = %4d | th_width = %4d\n", __func__, "kernel_"#name, (void *) ctx->pipeline_##name, \
+(int) ctx->pipeline_##name.maxTotalThreadsPerThreadgroup, \
+(int) ctx->pipeline_##name.threadExecutionWidth); \
+if (error) { \
+metal_printf("%s: load pipeline error: %s\n", __func__, [[error description] UTF8String]); \
+return NULL; \
+}
+        
         GGML_METAL_ADD_KERNEL(add);
         GGML_METAL_ADD_KERNEL(add_row);
         GGML_METAL_ADD_KERNEL(mul);
