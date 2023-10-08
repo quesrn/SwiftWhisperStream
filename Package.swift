@@ -16,10 +16,11 @@ let package = Package(
         .tvOS(.v13),
     ],
     products: [
-        .library(name: "SwiftWhisper", targets: ["SwiftWhisper"])
+        .library(name: "SwiftWhisper", targets: ["SwiftWhisper"]),
+        .library(name: "SwiftWhisperStream", targets: ["SwiftWhisperStream"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/ctreffs/SwiftSDL2.git", from: "1.4.0")
+        .package(url: "https://github.com/ctreffs/SwiftSDL2.git", from: "1.4.0"),
     ],
     targets: [
         .target(name: "SwiftWhisper", dependencies: [.target(name: "whisper_cpp")]),
