@@ -20,7 +20,7 @@ let package = Package(
         .library(name: "SwiftWhisperStream", targets: ["SwiftWhisperStream"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/ctreffs/SwiftSDL2.git", from: "1.4.0"),
+        .package(url: "https://github.com/ctreffs/SwiftSDL2.git", from: "1.4.1"),
     ],
     targets: [
         .target(name: "SwiftWhisper", dependencies: [.target(name: "whisper_cpp")]),
