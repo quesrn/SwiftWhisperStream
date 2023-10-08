@@ -19,6 +19,7 @@ public struct CaptureDevice {
         get throws {
             var devices = [CaptureDevice]()
             
+            SDL_SetMainReady()
             let result = SDL_Init(SDL_INIT_AUDIO)
             if result < 0 {
                 print("SDL could not initialize! SDL_Error: \(String(cString: SDL_GetError()))")
