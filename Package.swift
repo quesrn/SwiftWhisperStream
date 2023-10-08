@@ -1,7 +1,7 @@
 // swift-tools-version:5.5
 import PackageDescription
 
-var exclude: [String] = []
+//var exclude: [String] = []
 
 #if os(Linux)
 // Linux doesn't support CoreML, and will attempt to import the coreml source directory
@@ -33,9 +33,11 @@ let package = Package(
             dependencies: [
                 .product(name: "SDL", package: "SwiftSDL2"),
             ], 
-            exclude: exclude,
+            exclude: [
+                "ggml-metal.metal",
+            ],
             resources: [
-                .process("ggml-metal.metal"),
+//                .process("ggml-metal.metal"),
             ],
             publicHeadersPath: "include",
             cSettings: [
