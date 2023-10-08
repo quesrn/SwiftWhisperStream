@@ -1,5 +1,6 @@
 import LibWhisper
 //import SDL2
+import SDL
 
 public enum CaptureDeviceError: Error {
     case sdlErrorCode(Int32)
@@ -20,6 +21,7 @@ public struct CaptureDevice {
             
             let result = SDL_Init(SDL_INIT_AUDIO)
             if result < 0 {
+                print("SDL could not initialize! SDL_Error: \(String(cString: SDL_GetError()))")
                 throw CaptureDeviceError.sdlErrorCode(result)
             }
             
