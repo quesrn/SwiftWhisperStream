@@ -8,7 +8,7 @@ class TranscriptionTests: ResourceDependentTestCase, ModelFileTestCase, AudioFil
     fileprivate var whisperTinyModel: Whisper {
         get async {
             let modelURL = await tinyModelURL!
-            let whisper = Whisper(fromFileURL: modelURL)
+            guard let whisper = Whisper(fromFileURL: modelURL) else { fatalError("Couldn't get whisper model") }
 
             return whisper
         }

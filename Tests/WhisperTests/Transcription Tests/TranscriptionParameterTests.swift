@@ -15,9 +15,9 @@ class TranscriptionParamterTests: ResourceDependentTestCase, ModelFileTestCase, 
         let whisper = Whisper(fromFileURL: modelURL, withParams: params)
         let jfk = jfkAudioFrames!
 
-        let segments = try await whisper.transcribe(audioFrames: jfk)
+        let segments = try await whisper?.transcribe(audioFrames: jfk)
 
         // The JFK audio contains 23 non-empty segments
-        XCTAssert(segments.filter { !$0.text.isEmpty }.count == 23)
+        XCTAssert(segments?.filter { !$0.text.isEmpty }.count == 23)
     }
 }
