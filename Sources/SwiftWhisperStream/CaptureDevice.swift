@@ -34,6 +34,10 @@ public struct CaptureDevice {
             return devices
         }
     }
+    
+    public func close() {
+        SDL_CloseAudioDevice(SDL_AudioDeviceID(id))
+    }
 }
 
 extension CaptureDevice: Equatable {

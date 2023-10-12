@@ -155,13 +155,13 @@ int stream_run(stream_context *ctx, void *callback_ctx, stream_callback_t callba
         ctx->pcmf32_old = ctx->pcmf32;
     } else {
         auto t_diff = std::chrono::duration_cast<std::chrono::milliseconds>(t_now - ctx->t_last).count();
-        if (t_diff < 2000) {
+        if (t_diff < 700) {
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
             return 0;
         }
         
         // process new audio
-        ctx->audio->get(2000, ctx->pcmf32_new);
+        ctx->audio->get(700, ctx->pcmf32_new);
         
         if (::vad_simple(ctx->pcmf32_new, WHISPER_SAMPLE_RATE, 1000, params.vad_thold, params.freq_thold, false)) {
             ctx->audio->get(params.length_ms, ctx->pcmf32);
