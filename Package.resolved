@@ -1,16 +1,14 @@
 {
-  "object": {
-    "pins": [
-      {
-        "package": "SDL",
-        "repositoryURL": "https://github.com/ctreffs/SwiftSDL2.git",
-        "state": {
-          "branch": null,
-          "revision": "30a2886bd68e43fc19ba29b63ffe230ac0e4db7a",
-          "version": "1.4.1"
-        }
+  "pins" : [
+    {
+      "identity" : "swiftsdl2",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/lake-of-fire/SwiftSDL2.git",
+      "state" : {
+        "branch" : "master",
+        "revision" : "be24c629c533b0b07e56c1391452f15b4078b4dc"
       }
-    ]
-  },
-  "version": 1
+    }
+  ],
+  "version" : 2
 }
