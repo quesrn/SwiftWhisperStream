@@ -68,27 +68,29 @@ public class WhisperStream: Thread {
                 params.capture_id = device.id
             }
             
-            let ctx = stream_init(params)
-            self.streamContext = ctx
-            if ctx == nil {
-                return
-            }
-            
-            while !self.isCancelled {
-                let errno = stream_run(ctx, Unmanaged.passUnretained(self).toOpaque()) {
-                    return Unmanaged<WhisperStream>.fromOpaque($3!).takeUnretainedValue().callback(
-                        text: $0 != nil ? String(cString: $0!) : nil,
-                        t0: $1,
-                        t1: $2
-                    )
+            if !isCancelled {
+                let ctx = stream_init(params)
+                streamContext = ctx
+                if ctx == nil {
+                    return
                 }
-                if errno != 0 {
-                    break
+                
+                while !isCancelled {
+                    let errno = stream_run(ctx, Unmanaged.passUnretained(self).toOpaque()) {
+                        return Unmanaged<WhisperStream>.fromOpaque($3!).takeUnretainedValue().callback(
+                            text: $0 != nil ? String(cString: $0!) : nil,
+                            t0: $1,
+                            t1: $2
+                        )
+                    }
+                    if errno != 0 {
+                        break
+                    }
                 }
+                
+                stream_free(ctx)
+                streamContext = nil
             }
-            
-            stream_free(ctx)
-            self.streamContext = nil
             alive = false
         }
     }
