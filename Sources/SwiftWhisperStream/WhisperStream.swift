@@ -26,6 +26,8 @@ public class WhisperStream: Thread {
     let device: CaptureDevice?
     let window: TimeInterval
     
+    private let streamInitQueue = DispatchQueue(label: "streamInitQueue")
+
     public init(model: URL, device: CaptureDevice? = nil, window: TimeInterval = 300) {
         self.model = model
         self.device = device
@@ -58,23 +60,28 @@ public class WhisperStream: Thread {
     public func join() {
         waiter.wait()
     }
-    
+   
     func task() {
         model.path.withCString { modelCStr in
             var params = stream_default_params()
             params.model = modelCStr
-            
+
             if let device = device {
                 params.capture_id = device.id
             }
+
+            guard !isCancelled else {
+                alive = false
+                return
+            }
             
-            if !isCancelled {
+            streamInitQueue.sync {
                 let ctx = stream_init(params)
                 streamContext = ctx
                 if ctx == nil {
                     return
                 }
-                
+
                 while !isCancelled {
                     let errno = stream_run(ctx, Unmanaged.passUnretained(self).toOpaque()) {
                         return Unmanaged<WhisperStream>.fromOpaque($3!).takeUnretainedValue().callback(
@@ -87,11 +94,11 @@ public class WhisperStream: Thread {
                         break
                     }
                 }
-                
+
                 stream_free(ctx)
                 streamContext = nil
+                alive = false
             }
-            alive = false
         }
     }
     
