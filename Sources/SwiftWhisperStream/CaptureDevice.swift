@@ -6,7 +6,7 @@ public enum CaptureDeviceError: Error {
     case sdlErrorCode(Int32)
 }
 
-public struct CaptureDevice {
+public struct CaptureDevice: Identifiable {
     public let id: Int32
     public let name: String
     
