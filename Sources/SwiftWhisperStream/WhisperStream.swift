@@ -17,45 +17,45 @@ public extension OrderedSegments {
 
 public class WhisperStream: Thread {
     let waiter = DispatchGroup()
-    
+
     @Published public private(set) var segments = OrderedSegments()
     @Published public private(set) var alive = true
     private var streamContext: stream_context_t?
-    
+
     let model: URL
     let device: CaptureDevice?
     let window: TimeInterval
-    
-    private let streamInitQueue = DispatchQueue(label: "streamInitQueue")
-    private let streamContextLock = NSLock()
-    
+
+    // Define a class-level lock to ensure serial execution of stream_init
+    private static let streamInitLock = NSLock()
+
     public init(model: URL, device: CaptureDevice? = nil, window: TimeInterval = 300) {
         self.model = model
         self.device = device
         self.window = window
         super.init()
     }
-    
+
     deinit {
         if let streamContext = streamContext {
             stream_free(streamContext)
         }
     }
-    
+
     public override func start() {
         waiter.enter()
         super.start()
     }
-    
+
     public override func main() {
         task()
         waiter.leave()
     }
-    
+
     public func join() {
         waiter.wait()
     }
-   
+
     func task() {
         model.path.withCString { modelCStr in
             var params = stream_default_params()
@@ -69,41 +69,38 @@ public class WhisperStream: Thread {
                 alive = false
                 return
             }
-            
-            streamInitQueue.sync {
-                streamContextLock.lock()
-                print("entered lock... \(self.threadDictionary)")
-                let ctx = stream_init(params)
-                streamContext = ctx
-                print("unlock... \(self.threadDictionary)")
-                streamContextLock.unlock()
-                
-                if ctx == nil {
-                    return
-                }
 
-                while !isCancelled {
-                    let errno = stream_run(ctx, Unmanaged.passUnretained(self).toOpaque()) {
-                        return Unmanaged<WhisperStream>.fromOpaque($3!).takeUnretainedValue().callback(
-                            text: $0 != nil ? String(cString: $0!) : nil,
-                            t0: $1,
-                            t1: $2
-                        )
-                    }
-                    if errno != 0 {
-                        break
-                    }
-                }
-
-                streamContextLock.lock()
-                stream_free(ctx)
-                streamContext = nil
-                streamContextLock.unlock()
-                alive = false
+            // Use the class-level lock to ensure only one instance initializes stream at a time
+            WhisperStream.streamInitLock.lock()
+            defer {
+                WhisperStream.streamInitLock.unlock()
             }
+
+            let ctx = stream_init(params)
+            streamContext = ctx
+            if ctx == nil {
+                return
+            }
+
+            while !isCancelled {
+                let errno = stream_run(ctx, Unmanaged.passUnretained(self).toOpaque()) {
+                    return Unmanaged<WhisperStream>.fromOpaque($3!).takeUnretainedValue().callback(
+                        text: $0 != nil ? String(cString: $0!) : nil,
+                        t0: $1,
+                        t1: $2
+                    )
+                }
+                if errno != 0 {
+                    break
+                }
+            }
+
+            stream_free(ctx)
+            streamContext = nil
+            alive = false
         }
     }
-    
+
     func callback(text: String?, t0: Int64, t1: Int64) -> Int32 {
         if segments.isEmpty || text == nil {
             segments.append(Segment(text: "", t0: -1, t1: -1))
@@ -111,7 +108,7 @@ public class WhisperStream: Thread {
         if let text = text {
             segments[segments.count - 1] = Segment(text: text, t0: t0, t1: t1)
         }
-        
+
         var k = 0
         for segment in segments {
             if let last = segments.last, last.t0 - segment.t0 > Int64(window * 1000) {
@@ -119,7 +116,7 @@ public class WhisperStream: Thread {
             }
         }
         segments.removeFirst(k)
-        
+
         return 0
     }
 }
