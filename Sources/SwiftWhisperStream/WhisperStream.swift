@@ -20,6 +20,7 @@ public class WhisperStream: Thread {
     
     @Published public private(set) var segments = OrderedSegments()
     @Published public private(set) var alive = true
+    private var streamContext: stream_context_t?
     
     let model: URL
     let device: CaptureDevice?
@@ -32,9 +33,21 @@ public class WhisperStream: Thread {
         super.init()
     }
     
+    deinit {
+        if let streamContext = streamContext {
+            stream_free(streamContext)
+        }
+    }
+    
     public override func start() {
         waiter.enter()
         super.start()
+    }
+    
+    public override func cancel() {
+        if let streamContext = streamContext {
+            stream_free(streamContext)
+        }
     }
     
     public override func main() {
@@ -56,6 +69,7 @@ public class WhisperStream: Thread {
             }
             
             let ctx = stream_init(params)
+            self.streamContext = ctx
             if ctx == nil {
                 return
             }
@@ -74,6 +88,7 @@ public class WhisperStream: Thread {
             }
             
             stream_free(ctx)
+            self.streamContext = nil
             alive = false
         }
     }
