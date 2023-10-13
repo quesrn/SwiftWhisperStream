@@ -119,4 +119,8 @@ public class WhisperStream: Thread {
 
         return 0
     }
+    
+    public func clearSegments() {
+        segments.removeAll()
+    }
 }
