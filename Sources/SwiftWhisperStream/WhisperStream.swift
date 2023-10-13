@@ -72,8 +72,10 @@ public class WhisperStream: Thread {
             
             streamInitQueue.sync {
                 streamContextLock.lock()
+                print("entered lock... \(self.threadDictionary)")
                 let ctx = stream_init(params)
                 streamContext = ctx
+                print("unlock... \(self.threadDictionary)")
                 streamContextLock.unlock()
                 
                 if ctx == nil {
