@@ -27,7 +27,8 @@ public class WhisperStream: Thread {
     let window: TimeInterval
     
     private let streamInitQueue = DispatchQueue(label: "streamInitQueue")
-
+    private let streamContextLock = NSLock()
+    
     public init(model: URL, device: CaptureDevice? = nil, window: TimeInterval = 300) {
         self.model = model
         self.device = device
@@ -70,8 +71,11 @@ public class WhisperStream: Thread {
             }
             
             streamInitQueue.sync {
+                streamContextLock.lock()
                 let ctx = stream_init(params)
                 streamContext = ctx
+                streamContextLock.unlock()
+                
                 if ctx == nil {
                     return
                 }
@@ -89,8 +93,10 @@ public class WhisperStream: Thread {
                     }
                 }
 
+                streamContextLock.lock()
                 stream_free(ctx)
                 streamContext = nil
+                streamContextLock.unlock()
                 alive = false
             }
         }
