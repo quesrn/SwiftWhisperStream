@@ -46,12 +46,6 @@ public class WhisperStream: Thread {
         super.start()
     }
     
-    public override func cancel() {
-        if let streamContext = streamContext {
-            stream_free(streamContext)
-        }
-    }
-    
     public override func main() {
         task()
         waiter.leave()
