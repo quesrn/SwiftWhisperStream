@@ -37,7 +37,7 @@ struct stream_params stream_default_params() {
     return stream_params {
         /* .n_threads     =*/ std::min(4, (int32_t) std::thread::hardware_concurrency()),
         /* .step_ms       =*/ 700,
-        /* .length_ms     =*/ 16000,
+        /* .length_ms     =*/ 10000,
         /* .keep_ms       =*/ 200,
         /* .capture_id    =*/ -1,
         /* .max_tokens    =*/ 64,
