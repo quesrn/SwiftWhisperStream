@@ -35,6 +35,8 @@ struct stream_context {
 
 struct stream_params stream_default_params() {
     return stream_params {
+        /* .n_threads     =*/ std::min(4, (int32_t) std::thread::hardware_concurrency()),
+        
         //orig:
 //        /* .step_ms       =*/ 3000,
 //        /* .length_ms     =*/ 10000,
@@ -45,7 +47,6 @@ struct stream_params stream_default_params() {
 //        /* .language      =*/ "en",
 //        /* .model         =*/ "models/ggml-base.en.bin"
 
-        /* .n_threads     =*/ std::min(4, (int32_t) std::thread::hardware_concurrency()),
 //        /* .step_ms       =*/ 500,
 //        /* .length_ms     =*/ 15000,
 //        /* .keep_ms       =*/ 200,
