@@ -55,11 +55,11 @@ struct stream_params stream_default_params() {
 //        /* .model         =*/ "models/ggml-base.en.bin"
 
         /* .n_threads     =*/ std::min(4, (int32_t) std::thread::hardware_concurrency()),
-        /* .step_ms       =*/ 500,
-        /* .length_ms     =*/ 30000,
-        /* .keep_ms       =*/ 200,
+        /* .step_ms       =*/ 1000,
+        /* .length_ms     =*/ 10000,
+        /* .keep_ms       =*/ 250,
         /* .capture_id    =*/ -1,
-        /* .max_tokens    =*/ 64,
+        /* .max_tokens    =*/ 32,
         /* .audio_ctx     =*/ 0,
 
         /* .vad_thold     =*/ 0.6f,
