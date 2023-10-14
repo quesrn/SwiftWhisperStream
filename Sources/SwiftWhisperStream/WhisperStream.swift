@@ -25,14 +25,16 @@ public class WhisperStream: Thread {
     let model: URL
     let device: CaptureDevice?
     let window: TimeInterval
+    let suppressNonSpeechOutput: Bool
 
     // Define a class-level lock to ensure serial execution of stream_init
     private static let streamInitLock = NSLock()
 
-    public init(model: URL, device: CaptureDevice? = nil, window: TimeInterval = 300) {
+    public init(model: URL, device: CaptureDevice? = nil, window: TimeInterval = (60 * 60), suppressNonSpeechOutput: Bool = true) {
         self.model = model
         self.device = device
         self.window = window
+        self.suppressNonSpeechOutput = suppressNonSpeechOutput
         super.init()
     }
 
@@ -105,7 +107,10 @@ public class WhisperStream: Thread {
         if segments.isEmpty || text == nil {
             segments.append(Segment(text: "", t0: -1, t1: -1))
         }
-        if let text = text {
+        if var text = text {
+            if suppressNonSpeechOutput {
+                text = suppressNonSpeech(text: text)
+            }
             segments[segments.count - 1] = Segment(text: text, t0: t0, t1: t1)
         }
 
@@ -123,4 +128,21 @@ public class WhisperStream: Thread {
     public func clearSegments() {
         segments.removeAll()
     }
+    
+    func suppressNonSpeech(text: String) -> String {
+        var text = text
+        // TODO: Disallow hyphens, single quotes at start of line (only between words)
+        //        symbols = list("\"#()*+/:;<=>@[\\]^_`{|}~「」『』")
+        //        symbols += "<< >> <<< >>> -- --- -( -[ (' (\" (( )) ((( ))) [[ ]] {{ }} ♪♪ ♪♪♪".split()
+        //                miscellaneous = set("♩♪♫♬♭♮♯")
+        text = text
+            .replacingOccurrences(of: bracketPairsPattern, with: " ")
+            .replacingOccurrences(of: symbolsPattern, with: " ")
+            .replacingOccurrences(of: "  ", with: " ")
+        
+        return text.trimmingCharacters(in: .whitespacesAndNewlines)    }
 }
+
+// Non-symbol chars in brackets/parens
+fileprivate let bracketPairsPattern = #"\[[^\p{L}\p{N}\s]+\]|\([^[:alnum:]\s]+\)|\{[^\p{L}\p{N}\s]+\}|\「[^\p{L}\p{N}\s]+\」|\『[^\p{L}\p{N}\s]+\』"#
+fileprivate let symbolsPattern = #"[#*+/:;<=>^_`|~♩♪♫♬♭♮♯♪]+"#
