@@ -55,7 +55,7 @@ struct stream_params stream_default_params() {
 //        /* .audio_ctx     =*/ 0,
         
         /* .step_ms       =*/ 500,
-        /* .length_ms     =*/ 10000,
+        /* .length_ms     =*/ 5000,
         /* .keep_ms       =*/ 200,
         /* .capture_id    =*/ -1,
         /* .max_tokens    =*/ 32,
@@ -69,7 +69,7 @@ struct stream_params stream_default_params() {
         /* .print_special =*/ false,
         /* .no_context    =*/ true,
         /* .no_timestamps =*/ false,
-        /* .suppress_non_speech_tokens =*/ false,
+        /* .suppress_non_speech_tokens =*/ true,
 
         /* .language      =*/ "",
         /* .detect_language =*/ false,
