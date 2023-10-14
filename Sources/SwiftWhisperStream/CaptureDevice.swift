@@ -1,7 +1,7 @@
 import LibWhisper
-//import SDL2
 import SDL
 import CoreAudio
+import AVFoundation
 
 public enum CaptureDeviceError: Error {
     case sdlErrorCode(Int32)
