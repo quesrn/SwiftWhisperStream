@@ -26,15 +26,17 @@ public class WhisperStream: Thread {
     let device: CaptureDevice?
     let window: TimeInterval
     let suppressNonSpeechOutput: Bool
+    let language: String
 
     // Define a class-level lock to ensure serial execution of stream_init
     private static let streamInitLock = NSLock()
 
-    public init(model: URL, device: CaptureDevice? = nil, window: TimeInterval = (60 * 60), suppressNonSpeechOutput: Bool = true) {
+    public init(model: URL, device: CaptureDevice? = nil, window: TimeInterval = (60 * 60), suppressNonSpeechOutput: Bool = true, language: String? = nil) {
         self.model = model
         self.device = device
         self.window = window
         self.suppressNonSpeechOutput = suppressNonSpeechOutput
+        self.language = language?.lowercased() ?? ""
         super.init()
     }
 
@@ -59,47 +61,50 @@ public class WhisperStream: Thread {
     }
 
     func task() {
-        model.path.withCString { modelCStr in
-            var params = stream_default_params()
-            params.model = modelCStr
-
-            if let device = device {
-                params.capture_id = device.id
-            }
-
-            guard !isCancelled else {
+        language.withCString { languageCStr in
+            model.path.withCString { modelCStr in
+                var params = stream_default_params()
+                params.model = modelCStr
+                params.language = languageCStr
+                
+                if let device = device {
+                    params.capture_id = device.id
+                }
+                
+                guard !isCancelled else {
+                    alive = false
+                    return
+                }
+                
+                // Use the class-level lock to ensure only one instance initializes stream at a time
+                WhisperStream.streamInitLock.lock()
+                defer {
+                    WhisperStream.streamInitLock.unlock()
+                }
+                
+                let ctx = stream_init(params)
+                streamContext = ctx
+                if ctx == nil {
+                    return
+                }
+                
+                while !isCancelled {
+                    let errno = stream_run(ctx, Unmanaged.passUnretained(self).toOpaque()) {
+                        return Unmanaged<WhisperStream>.fromOpaque($3!).takeUnretainedValue().callback(
+                            text: $0 != nil ? String(cString: $0!) : nil,
+                            t0: $1,
+                            t1: $2
+                        )
+                    }
+                    if errno != 0 {
+                        break
+                    }
+                }
+                
+                stream_free(ctx)
+                streamContext = nil
                 alive = false
-                return
             }
-
-            // Use the class-level lock to ensure only one instance initializes stream at a time
-            WhisperStream.streamInitLock.lock()
-            defer {
-                WhisperStream.streamInitLock.unlock()
-            }
-
-            let ctx = stream_init(params)
-            streamContext = ctx
-            if ctx == nil {
-                return
-            }
-
-            while !isCancelled {
-                let errno = stream_run(ctx, Unmanaged.passUnretained(self).toOpaque()) {
-                    return Unmanaged<WhisperStream>.fromOpaque($3!).takeUnretainedValue().callback(
-                        text: $0 != nil ? String(cString: $0!) : nil,
-                        t0: $1,
-                        t1: $2
-                    )
-                }
-                if errno != 0 {
-                    break
-                }
-            }
-
-            stream_free(ctx)
-            streamContext = nil
-            alive = false
         }
     }
 

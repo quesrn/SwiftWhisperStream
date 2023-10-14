@@ -54,7 +54,7 @@ struct stream_params stream_default_params() {
 //        /* .max_tokens    =*/ 48,
 //        /* .audio_ctx     =*/ 0,
         
-        /* .step_ms       =*/ 3000,
+        /* .step_ms       =*/ 500,
         /* .length_ms     =*/ 10000,
         /* .keep_ms       =*/ 200,
         /* .capture_id    =*/ -1,
