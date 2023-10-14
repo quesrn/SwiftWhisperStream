@@ -72,6 +72,7 @@ struct stream_params stream_default_params() {
         /* .suppress_non_speech_tokens =*/ false,
 
         /* .language      =*/ "",
+        /* .detect_language =*/ true,
         /* .model         =*/ "models/ggml-base.en.bin"
     };
 }
@@ -205,6 +206,7 @@ int stream_run(stream_context *ctx, void *callback_ctx, stream_callback_t callba
     wparams.single_segment = !ctx->use_vad;
     wparams.max_tokens = params.max_tokens;
     wparams.language = params.language;
+    wparams.detect_language = params.detect_language;
     wparams.n_threads = params.n_threads;
 
     wparams.audio_ctx = params.audio_ctx;

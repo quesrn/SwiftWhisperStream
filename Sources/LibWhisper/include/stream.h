@@ -25,6 +25,7 @@ typedef struct stream_params {
     bool suppress_non_speech_tokens;
 
     const char *language;
+    bool detect_language;
     const char *model;
 } stream_params_t;
 
