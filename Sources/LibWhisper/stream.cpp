@@ -68,7 +68,7 @@ struct stream_params stream_default_params() {
         /* .print_special =*/ false,
         /* .no_context    =*/ true,
         /* .no_timestamps =*/ false,
-        /* .suppress_non_speech_tokens =*/ true,
+        /* .suppress_non_speech_tokens =*/ false,
 
         /* .language      =*/ "en",
         /* .model         =*/ "models/ggml-base.en.bin"
