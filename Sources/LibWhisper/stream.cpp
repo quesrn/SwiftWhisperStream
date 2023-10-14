@@ -72,7 +72,7 @@ struct stream_params stream_default_params() {
         /* .suppress_non_speech_tokens =*/ false,
 
         /* .language      =*/ "",
-        /* .detect_language =*/ true,
+        /* .detect_language =*/ false,
         /* .model         =*/ "models/ggml-base.en.bin"
     };
 }
