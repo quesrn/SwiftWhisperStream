@@ -36,8 +36,8 @@ struct stream_context {
 struct stream_params stream_default_params() {
     return stream_params {
         /* .n_threads     =*/ std::min(4, (int32_t) std::thread::hardware_concurrency()),
-        /* .step_ms       =*/ 700,
-        /* .length_ms     =*/ 10000,
+        /* .step_ms       =*/ 500,
+        /* .length_ms     =*/ 30000,
         /* .keep_ms       =*/ 200,
         /* .capture_id    =*/ -1,
         /* .max_tokens    =*/ 64,
@@ -51,6 +51,7 @@ struct stream_params stream_default_params() {
         /* .print_special =*/ false,
         /* .no_context    =*/ true,
         /* .no_timestamps =*/ false,
+        /* .suppress_non_speech_tokens =*/ true,
 
         /* .language      =*/ "auto",
         /* .model         =*/ "models/ggml-base.en.bin"
@@ -155,13 +156,13 @@ int stream_run(stream_context *ctx, void *callback_ctx, stream_callback_t callba
         ctx->pcmf32_old = ctx->pcmf32;
     } else {
         auto t_diff = std::chrono::duration_cast<std::chrono::milliseconds>(t_now - ctx->t_last).count();
-        if (t_diff < 700) {
+        if (t_diff < 500) {
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
             return 0;
         }
         
         // process new audio
-        ctx->audio->get(700, ctx->pcmf32_new);
+        ctx->audio->get(500, ctx->pcmf32_new);
         
         if (::vad_simple(ctx->pcmf32_new, WHISPER_SAMPLE_RATE, 1000, params.vad_thold, params.freq_thold, false)) {
             ctx->audio->get(params.length_ms, ctx->pcmf32);
@@ -182,6 +183,7 @@ int stream_run(stream_context *ctx, void *callback_ctx, stream_callback_t callba
     wparams.print_timestamps = !params.no_timestamps;
     wparams.translate = params.translate;
     wparams.no_context = true;
+    wparams.suppress_non_speech_tokens = params.suppress_non_speech_tokens;
     wparams.single_segment = !ctx->use_vad;
     wparams.max_tokens = params.max_tokens;
     wparams.language = params.language;

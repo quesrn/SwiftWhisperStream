@@ -22,6 +22,7 @@ typedef struct stream_params {
     bool print_special;
     bool no_context;
     bool no_timestamps;
+    bool suppress_non_speech_tokens;
 
     const char *language;
     const char *model;
