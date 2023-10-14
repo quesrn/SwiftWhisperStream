@@ -106,7 +106,7 @@ stream_context *stream_init(stream_params params) {
     ctx->audio->resume();
 
     // whisper init
-    if (whisper_lang_id(params.language) == -1) {
+    if (!(params.language == nullptr || strlen(params.language) == 0 || strcmp(params.language, "auto") == 0 || params.detect_language) && whisper_lang_id(params.language) == -1) {
         fprintf(stderr, "%s: unknown language '%s'\n", __func__, params.language);
         return NULL;
     }
