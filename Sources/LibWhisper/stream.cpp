@@ -35,6 +35,25 @@ struct stream_context {
 
 struct stream_params stream_default_params() {
     return stream_params {
+//        /* .step_ms       =*/ 3000,
+//        /* .length_ms     =*/ 10000,
+//        /* .keep_ms       =*/ 200,
+//        /* .capture_id    =*/ -1,
+//        /* .max_tokens    =*/ 32,
+//        /* .audio_ctx     =*/ 0,
+//
+//        /* .vad_thold     =*/ 0.6f,
+//        /* .freq_thold    =*/ 100.0f,
+//
+//        /* .speed_up      =*/ false,
+//        /* .translate     =*/ false,
+//        /* .print_special =*/ false,
+//        /* .no_context    =*/ true,
+//        /* .no_timestamps =*/ false,
+//
+//        /* .language      =*/ "en",
+//        /* .model         =*/ "models/ggml-base.en.bin"
+
         /* .n_threads     =*/ std::min(4, (int32_t) std::thread::hardware_concurrency()),
         /* .step_ms       =*/ 500,
         /* .length_ms     =*/ 30000,
@@ -53,7 +72,7 @@ struct stream_params stream_default_params() {
         /* .no_timestamps =*/ false,
         /* .suppress_non_speech_tokens =*/ true,
 
-        /* .language      =*/ "",
+        /* .language      =*/ "en",
         /* .model         =*/ "models/ggml-base.en.bin"
     };
 }
