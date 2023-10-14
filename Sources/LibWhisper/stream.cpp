@@ -53,7 +53,7 @@ struct stream_params stream_default_params() {
         /* .no_timestamps =*/ false,
         /* .suppress_non_speech_tokens =*/ true,
 
-        /* .language      =*/ nullptr,
+        /* .language      =*/ "",
         /* .model         =*/ "models/ggml-base.en.bin"
     };
 }
