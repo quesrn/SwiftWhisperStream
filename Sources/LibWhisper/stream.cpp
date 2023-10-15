@@ -120,8 +120,8 @@ void stream_free(stream_context *ctx) {
 
 int64_t format_time_point(std::chrono::time_point<std::chrono::high_resolution_clock> tp) {
     auto duration = tp.time_since_epoch();
-    int64_t milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
-    return milliseconds;
+    int64_t microseconds = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
+    return microseconds;
 }
 
 int stream_run(stream_context *ctx, void *callback_ctx, stream_callback_t callback) {
