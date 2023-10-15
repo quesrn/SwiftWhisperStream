@@ -92,12 +92,27 @@ public class WhisperStream: Thread {
                 }
                 
                 while !isCancelled {
-                    let errno = stream_run(ctx, Unmanaged.passUnretained(self).toOpaque()) {
-                        return Unmanaged<WhisperStream>.fromOpaque($3!).takeUnretainedValue().callback(
-                            text: $0 != nil ? String(cString: $0!) : nil,
-                            t0: $1,
-                            t1: $2
-                        )
+                    let errno = stream_run(ctx, Unmanaged.passUnretained(self).toOpaque()) { text, t0, t1, myself in
+                        let stream = Unmanaged<WhisperStream>.fromOpaque(myself!).takeUnretainedValue()
+                        stream.device?.vad?.speechDetectedAt.removeAll(where: { $0.1 < t0 })
+                        var speechCoverage: Int64 = 0
+                        for pair in (stream.device?.vad?.speechDetectedAt ?? []) {
+                            let (speech0, speech1) = pair
+                            let duration = min(t1, speech1) - max(t0, speech0)
+                            print("Duration: \(duration)")
+                            speechCoverage += duration
+                        }
+                        print("SUM : \(speechCoverage)")
+                        let speechRatio = Double(speechCoverage) / max(0, Double(t1) - Double(t0))
+                        print("RATIO : \(speechRatio)")
+                        if speechRatio < 0.1 {
+                            print("SKIPPED")
+                            return
+                        }
+                        return stream.callback(
+                            text: text != nil ? String(cString: text!) : nil,
+                            t0: t0,
+                            t1: t1)
                     }
                     if errno != 0 {
                         break

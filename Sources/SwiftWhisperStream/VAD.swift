@@ -5,9 +5,12 @@ import SDL2
 public class VAD: ObservableObject {
     @Published public var isSpeechDetected = false
     
+    var speechDetectedAt = [(Int64, Int64)]()
+    
     let inst: OpaquePointer
     let sampleRate: Int32
     let aggressiveness: Int32
+    let samples: UInt16 = 160
    
     var isMicrophoneActive = false
     
@@ -70,10 +73,11 @@ public class VAD: ObservableObject {
         desiredSpec.freq = sampleRate
         desiredSpec.format = SDL_AudioFormat(AUDIO_S16) // 16-bit signed, little-endian
         desiredSpec.channels = 1
-        desiredSpec.samples = 160
+        desiredSpec.samples = samples
         desiredSpec.callback = { userData, audioBuffer, length in
             guard let userData = userData else { return }
             let myself = Unmanaged<VAD>.fromOpaque(userData).takeUnretainedValue()
+            let samples = myself.samples
             myself.audioDataQueue.sync {
                 guard myself.isMicrophoneActive else { return }
                 
@@ -87,18 +91,27 @@ public class VAD: ObservableObject {
                 myself.audioFrameBuffer.append(contentsOf: Array(UnsafeBufferPointer(start: frames, count: count)))
                 
                 // Check if we have accumulated 30ms of audio data (480 frames)
-                if myself.audioFrameBuffer.count >= 160 {
+                if myself.audioFrameBuffer.count >= samples {
                     // Take the first 480 frames for processing
-                    let framesToProcess = Array(myself.audioFrameBuffer.prefix(160))
+                    let framesToProcess = Array(myself.audioFrameBuffer.prefix(Int(samples)))
                     
                     // Make the VAD decision using 30 ms of audio data (480 frames)
-                    let voiceActivity = myself.isSpeech(frames: framesToProcess, count: 160)
+                    let voiceActivity = myself.isSpeech(frames: framesToProcess, count: Int(samples))
                     
                     // Remove all frames from the buffer after processing
                     myself.audioFrameBuffer.removeAll()
                     
-                    Task { @MainActor in
-                        myself.isSpeechDetected = voiceActivity
+                    // After processing audio and running inference
+                    let t1 = myself.getCurrentMonotonicTimestamp() // Get the current monotonic timestamp in microseconds
+
+                    // Calculate t0 based on the logic from stream.cpp
+                    let t0 = max(0, t1 - Int64(myself.audioFrameBuffer.count) * 1000 / Int64(myself.sampleRate))
+                    
+                    Task { @MainActor [weak myself] in
+                        myself?.isSpeechDetected = voiceActivity
+                        if voiceActivity {
+                            myself?.speechDetectedAt.append((t0, t1))
+                        }
                     }
                 }
             }
@@ -127,5 +140,11 @@ public class VAD: ObservableObject {
         guard isMicrophoneActive else { return }
         isMicrophoneActive = false
         SDL_Quit()
+    }
+    
+    private func getCurrentMonotonicTimestamp() -> Int64 {
+        var ts = timespec()
+        clock_gettime(CLOCK_MONOTONIC, &ts)
+        return Int64(ts.tv_sec) * 1_000_000 + Int64(ts.tv_nsec) / 1_000
     }
 }
