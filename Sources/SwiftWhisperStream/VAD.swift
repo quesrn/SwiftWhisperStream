@@ -151,21 +151,27 @@ public class VAD: ObservableObject {
         return Int64(ts.tv_sec) * 1_000_000 + Int64(ts.tv_nsec) / 1_000
     }
     
-    private func addSpeechDetectionRange(range: (Int64, Int64)) {
-        speechDetectedAtSemaphore.wait()
-        speechDetectedAt.append(range)
-        speechDetectedAtSemaphore.signal()
-    }
-
     private func removeAllSpeechDetectionRanges() {
         speechDetectedAtSemaphore.wait()
+        defer {
+            speechDetectedAtSemaphore.signal()
+        }
         speechDetectedAt.removeAll()
-        speechDetectedAtSemaphore.signal()
     }
     
+    private func addSpeechDetectionRange(range: (Int64, Int64)) {
+        speechDetectedAtSemaphore.wait()
+        defer {
+            speechDetectedAtSemaphore.signal()
+        }
+        speechDetectedAt.append(range)
+    }
+
     func removeSpeechDetectionRanges(startTime: Int64, t0: Int64, t1: Int64) {
         speechDetectedAtSemaphore.wait()
+        defer {
+            speechDetectedAtSemaphore.signal()
+        }
         speechDetectedAt.removeAll { $0.1 < (startTime + (t0 * 1000)) || $0.0 > (startTime + (t1 * 1000)) }
-        speechDetectedAtSemaphore.signal()
     }
 }
