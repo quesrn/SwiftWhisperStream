@@ -101,14 +101,11 @@ public class WhisperStream: Thread {
                             let speech0 = max(0, pair.0 - startTime) / 1000
                             let speech1 = max(0, pair.1 - startTime) / 1000
                             let duration = max(0, min(t1, speech1) - max(t0, speech0))
-                            print("vad \(speech0) \(speech1) t \(t0) \(t1)")
-                            print("Duration: \(duration)")
                             speechCoverage += duration
                         }
-                        print("SUM : \(speechCoverage)")
                         let speechRatio = Double(speechCoverage) / max(0, Double(t1) - Double(t0))
                         print("RATIO : \(speechRatio)")
-                        if speechRatio < 0.1 {
+                        if speechRatio < 0.3 {
                             print("SKIPPED")
                             return 0
                         } else {
