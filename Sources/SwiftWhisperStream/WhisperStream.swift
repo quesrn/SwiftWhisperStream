@@ -1,5 +1,6 @@
 import AVFoundation
 import LibWhisper
+import libfvad
 
 public struct Segment {
     let text: String
@@ -16,12 +17,14 @@ public extension OrderedSegments {
 }
 
 public class WhisperStream: Thread {
-    let waiter = DispatchGroup()
-
+    public let vad = VAD()
+    
     @Published public private(set) var segments = OrderedSegments()
     @Published public private(set) var alive = true
     private var streamContext: stream_context_t?
 
+    let waiter = DispatchGroup()
+    
     let model: URL
     let device: CaptureDevice?
     let window: TimeInterval
