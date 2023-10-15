@@ -1,6 +1,5 @@
 import AVFoundation
 import LibWhisper
-import libfvad
 
 public struct Segment {
     let text: String
@@ -17,8 +16,6 @@ public extension OrderedSegments {
 }
 
 public class WhisperStream: Thread {
-    public let vad = VAD()
-    
     @Published public private(set) var segments = OrderedSegments()
     @Published public private(set) var alive = true
     private var streamContext: stream_context_t?
@@ -64,6 +61,8 @@ public class WhisperStream: Thread {
     }
 
     func task() {
+        device?.activateVAD()
+        
         language.withCString { languageCStr in
             model.path.withCString { modelCStr in
                 var params = stream_default_params()
@@ -76,6 +75,7 @@ public class WhisperStream: Thread {
                 
                 guard !isCancelled else {
                     alive = false
+                    device?.deactivateVAD()
                     return
                 }
                 
@@ -104,6 +104,7 @@ public class WhisperStream: Thread {
                     }
                 }
                 
+                device?.deactivateVAD()
                 stream_free(ctx)
                 streamContext = nil
                 alive = false

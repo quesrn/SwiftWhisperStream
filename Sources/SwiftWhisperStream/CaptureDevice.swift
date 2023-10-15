@@ -1,5 +1,6 @@
 import LibWhisper
 import SDL
+import libfvad
 
 public enum CaptureDeviceError: Error {
     case sdlErrorCode(Int32)
@@ -8,6 +9,8 @@ public enum CaptureDeviceError: Error {
 public struct CaptureDevice: Identifiable {
     public let id: Int32
     public let name: String
+    
+    public let vad = VAD()
     
     public init(id: Int32, name: String) {
         self.id = id
@@ -36,6 +39,16 @@ public struct CaptureDevice: Identifiable {
     
     public func close() {
         SDL_CloseAudioDevice(SDL_AudioDeviceID(id))
+    }
+    
+    func activateVAD() {
+        guard let vad = vad else { return }
+        vad.activateMicrophone(deviceID: SDL_AudioDeviceID(id))
+    }
+    
+    func deactivateVAD() {
+        guard let vad = vad else { return }
+        vad.deactivateMicrophone()
     }
 }
 
