@@ -104,12 +104,11 @@ public class WhisperStream: Thread {
                             speechCoverage += duration
                         }
                         let speechRatio = Double(speechCoverage) / max(0, Double(t1) - Double(t0))
-                        print("RATIO : \(speechRatio)")
-                        if speechRatio < 0.3 {
-                            print("SKIPPED")
+                        if speechRatio < 0.5 {
+                            print("SKIPPED \(speechRatio) \(text != nil ? String(cString: text!) : nil)")
                             return 0
                         } else {
-                            print("NOT SKIP! \(text != nil ? String(cString: text!) : nil)")
+                            print("NOT SKIP! \(speechRatio) \(text != nil ? String(cString: text!) : nil)")
                         }
                         return stream.callback(
                             text: text != nil ? String(cString: text!) : nil,
