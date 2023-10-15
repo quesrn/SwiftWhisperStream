@@ -93,7 +93,7 @@ public class VAD: ObservableObject {
                     
                     // Make the VAD decision using 30 ms of audio data (480 frames)
                     let voiceActivity = myself.isSpeech(frames: framesToProcess, count: 480)
-                    print("Voice activity? \(voiceActivity.description) for count \(myself.audioFrameBuffer.count)")
+//                    print("Voice activity? \(voiceActivity.description) for count \(myself.audioFrameBuffer.count)")
                     // Remove all frames from the buffer after processing
                     myself.audioFrameBuffer.removeAll()
                     
