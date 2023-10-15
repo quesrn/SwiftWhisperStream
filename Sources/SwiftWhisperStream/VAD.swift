@@ -105,7 +105,8 @@ public class VAD: ObservableObject {
                     let t1 = myself.getCurrentMonotonicTimestamp() // Get the current monotonic timestamp in microseconds
 
                     // Calculate t0 based on the logic from stream.cpp
-                    let t0 = max(0, t1 - Int64(framesToProcess.count) * 1000 / Int64(myself.sampleRate))
+                    let durationMicroseconds = Int64(framesToProcess.count) * 1_000_000 / Int64(myself.sampleRate)
+                    let t0 = max(0, t1 - durationMicroseconds)
                     
                     Task { @MainActor [weak myself] in
                         myself?.isSpeechDetected = voiceActivity
