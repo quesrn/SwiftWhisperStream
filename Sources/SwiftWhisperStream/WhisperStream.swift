@@ -94,13 +94,13 @@ public class WhisperStream: Thread {
                 while !isCancelled {
                     let errno = stream_run(ctx, Unmanaged.passUnretained(self).toOpaque()) { text, t0, t1, startTime, myself in
                         let stream = Unmanaged<WhisperStream>.fromOpaque(myself!).takeUnretainedValue()
-                        stream.device?.vad?.speechDetectedAt.removeAll(where: { $0.1 < (startTime + (t0 * 1000)) })
+                        stream.device?.vad?.speechDetectedAt.removeAll(where: { $0.1 < (startTime + (t0 * 1000)) || $0.0 > (startTime + (t1 * 1000)) })
                         var speechCoverage: Int64 = 0
                         let speechDetectedAt = stream.device?.vad?.speechDetectedAt ?? []
                         for pair in speechDetectedAt {
                             let speech0 = max(0, pair.0 - startTime) / 1000
                             let speech1 = max(0, pair.1 - startTime) / 1000
-                            let duration = min(t1, speech1) - max(t0, speech0)
+                            let duration = max(0, min(t1, speech1) - max(t0, speech0))
                             print("vad \(speech0) \(speech1) t \(t0) \(t1)")
                             print("Duration: \(duration)")
                             speechCoverage += duration
@@ -111,6 +111,8 @@ public class WhisperStream: Thread {
                         if speechRatio < 0.1 {
                             print("SKIPPED")
                             return 0
+                        } else {
+                            print("NOT SKIP! \(text ?? "")")
                         }
                         return stream.callback(
                             text: text != nil ? String(cString: text!) : nil,
