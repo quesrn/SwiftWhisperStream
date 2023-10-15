@@ -10,6 +10,9 @@ public class VAD: ObservableObject {
     let aggressiveness: Int32
    
     var isMicrophoneActive = false
+    
+    private let audioDataQueue = DispatchQueue(label: "VAD-AudioDataQueue")
+    private var audioFrameBuffer: [Int16] = []
 
     init?(_ sampleRate: Int = 16000, _ aggressiveness: Int = 3) {
         guard let inst = fvad_new() else { return nil }
@@ -66,24 +69,38 @@ public class VAD: ObservableObject {
         
         desiredSpec.freq = sampleRate
         desiredSpec.format = SDL_AudioFormat(AUDIO_S16) // 16-bit signed, little-endian
-//        desiredSpec.format   = SDL_AudioFormat(AUDIO_F32);
         desiredSpec.channels = 1
         desiredSpec.samples = 1024
         desiredSpec.callback = { userData, audioBuffer, length in
-            print("INSIDE VAD CALLBACK.... \(length)")
             guard let userData = userData else { return }
             let myself = Unmanaged<VAD>.fromOpaque(userData).takeUnretainedValue()
-            guard myself.isMicrophoneActive else { return }
-            
-            let bufferPointer = audioBuffer!.withMemoryRebound(to: Int16.self, capacity: Int(length)) {
-                $0
-            }
-            let frames = UnsafePointer(bufferPointer)
-            let count = Int(length) / MemoryLayout<Int16>.size
-            
-            let voiceActivity = myself.isSpeech(frames: frames, count: count)
-            Task { @MainActor in
-                myself.isSpeechDetected = voiceActivity
+            myself.audioDataQueue.sync {
+                guard myself.isMicrophoneActive else { return }
+                
+                let bufferPointer = audioBuffer!.withMemoryRebound(to: Int16.self, capacity: Int(length)) {
+                    $0
+                }
+                let frames = UnsafePointer(bufferPointer)
+                let count = Int(length) / MemoryLayout<Int16>.size
+                
+                // Accumulate audio frames in the buffer
+                myself.audioFrameBuffer.append(contentsOf: Array(UnsafeBufferPointer(start: frames, count: count)))
+                
+                // Check if we have accumulated 30ms of audio data (480 frames)
+                if myself.audioFrameBuffer.count >= 480 {
+                    // Take the first 480 frames for processing
+                    let framesToProcess = Array(myself.audioFrameBuffer.prefix(480))
+                    
+                    // Make the VAD decision using 30 ms of audio data (480 frames)
+                    let voiceActivity = myself.isSpeech(frames: framesToProcess, count: 480)
+                    
+                    // Remove all frames from the buffer after processing
+                    myself.audioFrameBuffer.removeAll()
+                    
+                    Task { @MainActor in
+                        myself.isSpeechDetected = voiceActivity
+                    }
+                }
             }
         }
         desiredSpec.userdata = Unmanaged.passUnretained(self).toOpaque()
@@ -101,12 +118,6 @@ public class VAD: ObservableObject {
             SDL_Quit()
             return
         }
-        
-        print("OBTAINED:")
-        print(obtainedSpec.freq)
-        print(obtainedSpec.format)
-        print(obtainedSpec.channels)
-        print(obtainedSpec.samples)
         
         SDL_PauseAudioDevice(audioDeviceStatus, 0)
         isMicrophoneActive = true
