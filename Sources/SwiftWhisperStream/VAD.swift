@@ -93,7 +93,14 @@ public class VAD: ObservableObject {
             return
         }
         
-        SDL_PauseAudioDevice(audioDeviceID, 0)
+        let audioDeviceStatus = SDL_OpenAudioDevice(nil, 1, &desiredSpec, &obtainedSpec, 0)
+        if audioDeviceStatus == 0 {
+            print("SDL_OpenAudioDevice failed: \(SDL_GetError()!)")
+            SDL_Quit()
+            return
+        }
+        
+//        SDL_PauseAudioDevice(audioDeviceID, 0)
         isMicrophoneActive = true
     }
     
