@@ -92,13 +92,14 @@ public class WhisperStream: Thread {
                 }
                 
                 while !isCancelled {
-                    let errno = stream_run(ctx, Unmanaged.passUnretained(self).toOpaque()) { text, t0, t1, myself in
+                    let errno = stream_run(ctx, Unmanaged.passUnretained(self).toOpaque()) { text, t0, t1, startTime, myself in
                         let stream = Unmanaged<WhisperStream>.fromOpaque(myself!).takeUnretainedValue()
                         stream.device?.vad?.speechDetectedAt.removeAll(where: { $0.1 < t0 })
                         var speechCoverage: Int64 = 0
                         for pair in (stream.device?.vad?.speechDetectedAt ?? []) {
                             let (speech0, speech1) = pair
                             let duration = min(t1, speech1) - max(t0, speech0)
+                            print("vad \(speech0) \(speech1) t \(t0) \(t1)")
                             print("Duration: \(duration)")
                             speechCoverage += duration
                         }
