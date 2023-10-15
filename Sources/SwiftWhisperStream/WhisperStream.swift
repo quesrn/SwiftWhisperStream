@@ -109,7 +109,7 @@ public class WhisperStream: Thread {
                             print("SKIPPED")
                             return 0
                         } else {
-                            print("NOT SKIP! \(text ?? "")")
+                            print("NOT SKIP! \(text != nil ? String(cString: text!) : nil)")
                         }
                         return stream.callback(
                             text: text != nil ? String(cString: text!) : nil,
