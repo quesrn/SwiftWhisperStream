@@ -65,10 +65,12 @@ public class VAD: ObservableObject {
         var obtainedSpec = SDL_AudioSpec()
         
         desiredSpec.freq = sampleRate
-        desiredSpec.format = SDL_AudioFormat(AUDIO_S16LSB) // 16-bit signed, little-endian
-        desiredSpec.channels = 1 // Mono
+//        desiredSpec.format = SDL_AudioFormat(AUDIO_S16LSB) // 16-bit signed, little-endian
+        desiredSpec.format   = SDL_AudioFormat(AUDIO_F32);
+        desiredSpec.channels = 1
         desiredSpec.samples = 1024
         desiredSpec.callback = { userData, audioBuffer, length in
+            print("INSIDE VAD CALLBACK.... \(length)")
             guard let userData = userData else { return }
             let myself = Unmanaged<VAD>.fromOpaque(userData).takeUnretainedValue()
             guard myself.isMicrophoneActive else { return }
