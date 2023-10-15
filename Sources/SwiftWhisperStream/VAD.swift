@@ -70,7 +70,7 @@ public class VAD: ObservableObject {
         desiredSpec.freq = sampleRate
         desiredSpec.format = SDL_AudioFormat(AUDIO_S16) // 16-bit signed, little-endian
         desiredSpec.channels = 1
-        desiredSpec.samples = 1024
+        desiredSpec.samples = 480
         desiredSpec.callback = { userData, audioBuffer, length in
             guard let userData = userData else { return }
             let myself = Unmanaged<VAD>.fromOpaque(userData).takeUnretainedValue()
