@@ -14,7 +14,7 @@ public class VAD: ObservableObject {
     private let audioDataQueue = DispatchQueue(label: "VAD-AudioDataQueue")
     private var audioFrameBuffer: [Int16] = []
 
-    init?(_ sampleRate: Int = 16000, _ aggressiveness: Int = 3) {
+    init?(_ sampleRate: Int = 16000, _ aggressiveness: Int = 2) {
         guard let inst = fvad_new() else { return nil }
         self.inst = inst
         
@@ -70,7 +70,7 @@ public class VAD: ObservableObject {
         desiredSpec.freq = sampleRate
         desiredSpec.format = SDL_AudioFormat(AUDIO_S16) // 16-bit signed, little-endian
         desiredSpec.channels = 1
-        desiredSpec.samples = 480
+        desiredSpec.samples = 160
         desiredSpec.callback = { userData, audioBuffer, length in
             guard let userData = userData else { return }
             let myself = Unmanaged<VAD>.fromOpaque(userData).takeUnretainedValue()
@@ -87,13 +87,13 @@ public class VAD: ObservableObject {
                 myself.audioFrameBuffer.append(contentsOf: Array(UnsafeBufferPointer(start: frames, count: count)))
                 
                 // Check if we have accumulated 30ms of audio data (480 frames)
-                if myself.audioFrameBuffer.count >= 480 {
+                if myself.audioFrameBuffer.count >= 160 {
                     // Take the first 480 frames for processing
-                    let framesToProcess = Array(myself.audioFrameBuffer.prefix(480))
+                    let framesToProcess = Array(myself.audioFrameBuffer.prefix(160))
                     
                     // Make the VAD decision using 30 ms of audio data (480 frames)
-                    let voiceActivity = myself.isSpeech(frames: framesToProcess, count: 480)
-//                    print("Voice activity? \(voiceActivity.description) for count \(myself.audioFrameBuffer.count)")
+                    let voiceActivity = myself.isSpeech(frames: framesToProcess, count: 160)
+                    
                     // Remove all frames from the buffer after processing
                     myself.audioFrameBuffer.removeAll()
                     
