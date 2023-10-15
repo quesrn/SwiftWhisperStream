@@ -13,9 +13,16 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/lake-of-fire/SwiftSDL2.git", branch: "master"),
+        .package(url: "https://github.com/TeHikuMedia/libfvad-ios.git", branch: "tumu"),
     ],
     targets: [
-        .target(name: "SwiftWhisperStream", dependencies: [.target(name: "whisper_cpp"), .target(name: "LibWhisper")]),
+        .target(
+            name: "SwiftWhisperStream",
+            dependencies: [
+                .product(name: "libfvad", package: "libfvad-ios"),
+                .target(name: "whisper_cpp"),
+                .target(name: "LibWhisper"),
+            ]),
         .target(name: "LibWhisper", dependencies: [
             .target(name: "whisper_cpp"),
         ]),
