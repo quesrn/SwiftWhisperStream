@@ -65,8 +65,8 @@ public class VAD: ObservableObject {
         var obtainedSpec = SDL_AudioSpec()
         
         desiredSpec.freq = sampleRate
-//        desiredSpec.format = SDL_AudioFormat(AUDIO_S16LSB) // 16-bit signed, little-endian
-        desiredSpec.format   = SDL_AudioFormat(AUDIO_F32);
+        desiredSpec.format = SDL_AudioFormat(AUDIO_S16) // 16-bit signed, little-endian
+//        desiredSpec.format   = SDL_AudioFormat(AUDIO_F32);
         desiredSpec.channels = 1
         desiredSpec.samples = 1024
         desiredSpec.callback = { userData, audioBuffer, length in
@@ -101,6 +101,12 @@ public class VAD: ObservableObject {
             SDL_Quit()
             return
         }
+        
+        print("OBTAINED:")
+        print(obtainedSpec.freq)
+        print(obtainedSpec.format)
+        print(obtainedSpec.channels)
+        print(obtainedSpec.samples)
         
         SDL_PauseAudioDevice(audioDeviceID, 0)
         isMicrophoneActive = true

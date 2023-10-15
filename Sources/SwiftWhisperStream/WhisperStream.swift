@@ -150,7 +150,8 @@ public class WhisperStream: Thread {
             .replacingOccurrences(of: symbolsPattern, with: " ")
             .replacingOccurrences(of: "  ", with: " ")
         
-        return text.trimmingCharacters(in: .whitespacesAndNewlines)    }
+        return text.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
 }
 
 // Non-symbol chars in brackets/parens
