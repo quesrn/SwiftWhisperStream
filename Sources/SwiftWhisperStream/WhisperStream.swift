@@ -107,7 +107,7 @@ public class WhisperStream: Thread {
                         print("RATIO : \(speechRatio)")
                         if speechRatio < 0.1 {
                             print("SKIPPED")
-                            return
+                            return 0
                         }
                         return stream.callback(
                             text: text != nil ? String(cString: text!) : nil,
