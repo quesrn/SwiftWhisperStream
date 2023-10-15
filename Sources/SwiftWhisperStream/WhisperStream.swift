@@ -98,8 +98,8 @@ public class WhisperStream: Thread {
                         var speechCoverage: Int64 = 0
                         let speechDetectedAt = stream.device?.vad?.speechDetectedAt ?? []
                         for pair in speechDetectedAt {
-                            let speech0 = max(0, pair.0 - startTime) / 1000000
-                            let speech1 = max(0, pair.1 - startTime) / 1000000
+                            let speech0 = max(0, pair.0 - startTime) / 1000
+                            let speech1 = max(0, pair.1 - startTime) / 1000
                             let duration = min(t1, speech1) - max(t0, speech0)
                             print("vad \(speech0) \(speech1) t \(t0) \(t1)")
                             print("Duration: \(duration)")
