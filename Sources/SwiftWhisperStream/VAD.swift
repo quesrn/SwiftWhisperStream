@@ -108,7 +108,7 @@ public class VAD: ObservableObject {
         print(obtainedSpec.channels)
         print(obtainedSpec.samples)
         
-        SDL_PauseAudioDevice(audioDeviceID, 0)
+        SDL_PauseAudioDevice(audioDeviceStatus, 0)
         isMicrophoneActive = true
     }
     
