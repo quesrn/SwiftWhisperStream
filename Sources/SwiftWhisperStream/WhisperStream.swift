@@ -94,7 +94,7 @@ public class WhisperStream: Thread {
                 while !isCancelled {
                     let errno = stream_run(ctx, Unmanaged.passUnretained(self).toOpaque()) { text, t0, t1, startTime, myself in
                         let stream = Unmanaged<WhisperStream>.fromOpaque(myself!).takeUnretainedValue()
-                        stream.device?.vad?.speechDetectedAt.removeAll(where: { $0.1 < t0 })
+                        stream.device?.vad?.speechDetectedAt.removeAll(where: { $0.1 < (startTime + t0) })
                         var speechCoverage: Int64 = 0
                         for pair in (stream.device?.vad?.speechDetectedAt ?? []) {
                             let speech0 = max(0, pair.0 - startTime)
