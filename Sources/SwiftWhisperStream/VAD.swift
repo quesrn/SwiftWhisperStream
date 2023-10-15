@@ -6,7 +6,8 @@ public class VAD: ObservableObject {
     @Published public var isSpeechDetected = false
     
     var speechDetectedAt = [(Int64, Int64)]()
-    
+    private var speechDetectedAtSemaphore = DispatchSemaphore(value: 1) // Initialize with 1 to allow single access at a time
+
     let inst: OpaquePointer
     let sampleRate: Int32
     let aggressiveness: Int32
@@ -111,7 +112,7 @@ public class VAD: ObservableObject {
                     Task { @MainActor [weak myself] in
                         myself?.isSpeechDetected = voiceActivity
                         if voiceActivity {
-                            myself?.speechDetectedAt.append((t0, t1))
+                            myself?.addSpeechDetectionRange(range: (t0, t1))
                         }
                     }
                 }
@@ -139,6 +140,7 @@ public class VAD: ObservableObject {
     
     func deactivateMicrophone() {
         guard isMicrophoneActive else { return }
+        removeAllSpeechDetectionRanges()
         isMicrophoneActive = false
         SDL_Quit()
     }
@@ -147,5 +149,23 @@ public class VAD: ObservableObject {
         var ts = timespec()
         clock_gettime(CLOCK_MONOTONIC, &ts)
         return Int64(ts.tv_sec) * 1_000_000 + Int64(ts.tv_nsec) / 1_000
+    }
+    
+    private func addSpeechDetectionRange(range: (Int64, Int64)) {
+        speechDetectedAtSemaphore.wait()
+        speechDetectedAt.append(range)
+        speechDetectedAtSemaphore.signal()
+    }
+
+    private func removeAllSpeechDetectionRanges() {
+        speechDetectedAtSemaphore.wait()
+        speechDetectedAt.removeAll()
+        speechDetectedAtSemaphore.signal()
+    }
+    
+    func removeSpeechDetectionRanges(startTime: Int64, t0: Int64, t1: Int64) {
+        speechDetectedAtSemaphore.wait()
+        speechDetectedAt.removeAll { $0.1 < (startTime + (t0 * 1000)) || $0.0 > (startTime + (t1 * 1000)) }
+        speechDetectedAtSemaphore.signal()
     }
 }
