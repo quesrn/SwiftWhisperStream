@@ -118,9 +118,10 @@ void stream_free(stream_context *ctx) {
     ctx->prompt_tokens.clear();
 }
 
-int64_t time_point_to_seconds(std::chrono::time_point<std::chrono::high_resolution_clock> tp) {
+int64_t format_time_point(std::chrono::time_point<std::chrono::high_resolution_clock> tp) {
     auto duration = tp.time_since_epoch();
-    return std::chrono::duration_cast<std::chrono::seconds>(duration).count();
+    int64_t milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+    return milliseconds;
 }
 
 int stream_run(stream_context *ctx, void *callback_ctx, stream_callback_t callback) {
@@ -221,13 +222,13 @@ int stream_run(stream_context *ctx, void *callback_ctx, stream_callback_t callba
         const int64_t segment_t0 = whisper_full_get_segment_t0(whisper, i);
         const int64_t segment_t1 = whisper_full_get_segment_t1(whisper, i);
 
-        callback(text, ctx->use_vad ? segment_t0 : t0, ctx->use_vad ? segment_t1 : t1, time_point_to_seconds(ctx->t_start), callback_ctx);
+        callback(text, ctx->use_vad ? segment_t0 : t0, ctx->use_vad ? segment_t1 : t1, format_time_point(ctx->t_start), callback_ctx);
     }
 
     ++ctx->n_iter;
 
     if (!ctx->use_vad && (ctx->n_iter % ctx->n_new_line) == 0) {
-        callback(NULL, 0, 0, time_point_to_seconds(ctx->t_start), callback_ctx);
+        callback(NULL, 0, 0, format_time_point(ctx->t_start), callback_ctx);
 
         // keep part of the audio for next iteration to try to mitigate word boundary issues
         ctx->pcmf32_old = std::vector<float>(ctx->pcmf32.end() - ctx->n_samples_keep, ctx->pcmf32.end());
