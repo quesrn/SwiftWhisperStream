@@ -100,7 +100,7 @@ public class VAD: ObservableObject {
             return
         }
         
-//        SDL_PauseAudioDevice(audioDeviceID, 0)
+        SDL_PauseAudioDevice(audioDeviceID, 0)
         isMicrophoneActive = true
     }
     
