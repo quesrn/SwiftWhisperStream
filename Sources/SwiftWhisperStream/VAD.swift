@@ -6,7 +6,7 @@ public class VAD: ObservableObject {
     @Published public var isSpeechDetected = false
     
     var speechDetectedAt = [(Int64, Int64)]()
-    private var speechDetectedAtSemaphore = DispatchSemaphore(value: 1) // Initialize with 1 to allow single access at a time
+    private let speechDetectedAtQueue = DispatchQueue(label: "VAD-SpeechDetectedAtQueue")
 
     let inst: OpaquePointer
     let sampleRate: Int32
@@ -152,26 +152,20 @@ public class VAD: ObservableObject {
     }
     
     private func removeAllSpeechDetectionRanges() {
-        speechDetectedAtSemaphore.wait()
-        defer {
-            speechDetectedAtSemaphore.signal()
+        speechDetectedAtQueue.sync {
+            speechDetectedAt.removeAll()
         }
-        speechDetectedAt.removeAll()
     }
     
     private func addSpeechDetectionRange(range: (Int64, Int64)) {
-        speechDetectedAtSemaphore.wait()
-        defer {
-            speechDetectedAtSemaphore.signal()
+        speechDetectedAtQueue.sync {
+            speechDetectedAt.append(range)
         }
-        speechDetectedAt.append(range)
     }
 
     func removeSpeechDetectionRanges(startTime: Int64, t0: Int64, t1: Int64) {
-        speechDetectedAtSemaphore.wait()
-        defer {
-            speechDetectedAtSemaphore.signal()
+        speechDetectedAtQueue.sync {
+            speechDetectedAt.removeAll { $0.1 < (startTime + (t0 * 1000)) || $0.0 > (startTime + (t1 * 1000)) }
         }
-        speechDetectedAt.removeAll { $0.1 < (startTime + (t0 * 1000)) || $0.0 > (startTime + (t1 * 1000)) }
     }
 }
