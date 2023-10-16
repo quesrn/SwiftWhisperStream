@@ -18,6 +18,7 @@ public extension OrderedSegments {
 public class WhisperStream: Thread {
     @Published public private(set) var segments = OrderedSegments()
     @Published public private(set) var alive = true
+    @Published public var isMuted = false
     private var streamContext: stream_context_t?
 
     let waiter = DispatchGroup()
@@ -94,28 +95,31 @@ public class WhisperStream: Thread {
                 
                 while !isCancelled {
                     let errno = stream_run(ctx, Unmanaged.passUnretained(self).toOpaque()) { text, t0, t1, startTime, myself in
+                        var resultText = text
                         let stream = Unmanaged<WhisperStream>.fromOpaque(myself!).takeUnretainedValue()
-                        stream.device?.vad?.removeSpeechDetectionRanges(startTime: startTime, t0: t0, t1: t1)
-                        var speechCoverage: Int64 = 0
-                        let speechDetectedAt = stream.device?.vad?.speechDetectedAt ?? []
-                        for pair in speechDetectedAt {
-                            let speech0 = max(0, pair.0 - startTime) / 1000
-                            let speech1 = max(0, pair.1 - startTime) / 1000
-                            let duration = max(0, min(t1, speech1) - max(t0, speech0))
-                            speechCoverage += duration
-                        }
-                        let speechRatio = Double(speechCoverage) / max(0, Double(t1) - Double(t0))
-                        if speechRatio.isNaN || speechRatio < 0.1 {
-                            print("SKIPPED \(speechRatio) \(text != nil ? String(cString: text!) : nil)")
-                            return stream.callback(
-                                text: nil,
-                                t0: t0,
-                                t1: t1)
+                        if stream.isMuted {
+                            stream.device?.vad?.removeAllSpeechDetectionRanges()
+                            resultText = nil
                         } else {
-                            print("NOT SKIP! \(speechRatio) \(text != nil ? String(cString: text!) : nil)")
+                            stream.device?.vad?.removeSpeechDetectionRanges(startTime: startTime, t0: t0, t1: t1)
+                            var speechCoverage: Int64 = 0
+                            let speechDetectedAt = stream.device?.vad?.speechDetectedAt ?? []
+                            for pair in speechDetectedAt {
+                                let speech0 = max(0, pair.0 - startTime) / 1000
+                                let speech1 = max(0, pair.1 - startTime) / 1000
+                                let duration = max(0, min(t1, speech1) - max(t0, speech0))
+                                speechCoverage += duration
+                            }
+                            let speechRatio = Double(speechCoverage) / max(0, Double(t1) - Double(t0))
+                            if speechRatio.isNaN || speechRatio < 0.1 {
+                                print("SKIPPED \(speechRatio) \(text != nil ? String(cString: text!) : nil)")
+                                resultText = nil
+                            } else {
+                                print("NOT SKIP! \(speechRatio) \(text != nil ? String(cString: text!) : nil)")
+                            }
                         }
                         return stream.callback(
-                            text: text != nil ? String(cString: text!) : nil,
+                            text: resultText != nil ? String(cString: resultText!) : nil,
                             t0: t0,
                             t1: t1)
                     }

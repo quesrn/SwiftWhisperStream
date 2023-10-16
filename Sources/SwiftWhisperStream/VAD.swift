@@ -151,7 +151,7 @@ public class VAD: ObservableObject {
         return Int64(ts.tv_sec) * 1_000_000 + Int64(ts.tv_nsec) / 1_000
     }
     
-    private func removeAllSpeechDetectionRanges() {
+    func removeAllSpeechDetectionRanges() {
         speechDetectedAtQueue.sync {
             speechDetectedAt.removeAll()
         }
