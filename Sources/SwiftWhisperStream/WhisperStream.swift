@@ -105,8 +105,8 @@ public class WhisperStream: Thread {
                         }
                         let speechRatio = Double(speechCoverage) / max(0, Double(t1) - Double(t0))
                         if speechRatio < 0.5 {
-                            print("SKIPPED \(speechRatio) \(text != nil ? String(cString: text!) : nil)")
-                            return 0
+                            print("?SKIPPED \(speechRatio) \(text != nil ? String(cString: text!) : nil)")
+//                            return 0
 //                            return stream.callback(
 //                                text: nil,
 //                                t0: t0,
