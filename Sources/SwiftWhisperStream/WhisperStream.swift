@@ -165,14 +165,13 @@ public class WhisperStream: Thread {
         //        symbols += "<< >> <<< >>> -- --- -( -[ (' (\" (( )) ((( ))) [[ ]] {{ }} ♪♪ ♪♪♪".split()
         //                miscellaneous = set("♩♪♫♬♭♮♯")
         text = text
-            .replacingOccurrences(of: bracketPairsPattern, with: " ")
-            .replacingOccurrences(of: symbolsPattern, with: " ")
+            .replacingOccurrences(of: bracketPairsPattern, with: " ", options: .regularExpression)
+            .replacingOccurrences(of: symbolsPattern, with: " ", options: .regularExpression)
             .replacingOccurrences(of: "  ", with: " ")
-        
-        return text.trimmingCharacters(in: .whitespacesAndNewlines)
+        return text
     }
 }
 
 // Non-symbol chars in brackets/parens
-fileprivate let bracketPairsPattern = #"\[[^\p{L}\p{N}\s]+\]|\([^[:alnum:]\s]+\)|\{[^\p{L}\p{N}\s]+\}|\「[^\p{L}\p{N}\s]+\」|\『[^\p{L}\p{N}\s]+\』"#
-fileprivate let symbolsPattern = #"[#*+/:;<=>^_`|~♩♪♫♬♭♮♯♪]+"#
+fileprivate let bracketPairsPattern = "\\[[^\\p{L}\\p{N}\\s]+\\]|\\([^\\p{L}\\p{N}\\s]+\\)|\\{[^\\p{L}\\p{N}\\s]+\\}|\\「[^\\p{L}\\p{N}\\s]+\\」|\\『[^\\p{L}\\p{N}\\s]+\\』"
+fileprivate let symbolsPattern = "[#*+/:;<=>^_`|~♩♪♫♬♭♮♯♪]+"
