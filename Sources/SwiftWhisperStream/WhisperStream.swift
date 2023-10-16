@@ -68,6 +68,7 @@ public class WhisperStream: Thread {
                 var params = stream_default_params()
                 params.model = modelCStr
                 params.language = languageCStr
+                params.suppress_non_speech_tokens = true
                 
                 if let device = device {
                     params.capture_id = device.id
@@ -137,7 +138,9 @@ public class WhisperStream: Thread {
             segments.append(Segment(text: "", t0: -1, t1: -1))
         }
         if var text = text {
-            if suppressNonSpeechOutput { text = suppressNonSpeech(text: text) }
+            if suppressNonSpeechOutput {
+                text = suppressNonSpeech(text: text)
+            }
             segments[segments.count - 1] = Segment(text: text, t0: t0, t1: t1)
         }
 
