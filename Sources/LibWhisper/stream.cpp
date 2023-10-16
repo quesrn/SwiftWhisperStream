@@ -37,12 +37,12 @@ struct stream_params stream_default_params() {
     return stream_params {
         /* .n_threads     =*/ std::min(3, (int32_t) std::thread::hardware_concurrency()),
         
-        /* .step_ms       =*/ 400,
-        /* .length_ms     =*/ 8000,
+        /* .step_ms       =*/ 500,
+        /* .length_ms     =*/ 5000,
 
-        /* .keep_ms       =*/ 200,
+        /* .keep_ms       =*/ 300,
         /* .capture_id    =*/ -1,
-        /* .max_tokens    =*/ 32,
+        /* .max_tokens    =*/ 64,
         /* .audio_ctx     =*/ 0,
         
         /* .vad_thold     =*/ 0.6f,
