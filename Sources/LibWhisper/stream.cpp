@@ -39,8 +39,8 @@ struct stream_params stream_default_params() {
         
 //        /* .step_ms       =*/ 400,
 //        /* .length_ms     =*/ 8000,
-        /* .step_ms       =*/ 800,
-        /* .length_ms     =*/ 5000,
+        /* .step_ms       =*/ 1500,
+        /* .length_ms     =*/ 8000,
 
         /* .keep_ms       =*/ 200,
         /* .capture_id    =*/ -1,
