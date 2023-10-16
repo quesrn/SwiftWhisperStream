@@ -35,7 +35,8 @@ struct stream_context {
 
 struct stream_params stream_default_params() {
     return stream_params {
-        /* .n_threads     =*/ std::min(4, (int32_t) std::thread::hardware_concurrency()),
+        /* .n_threads     =*//* std::min(4, (int32_t) std::thread::hardware_concurrency()),*/
+        /* .n_threads     =*/ 1,
         
 //        /* .step_ms       =*/ 400,
 //        /* .length_ms     =*/ 8000,
