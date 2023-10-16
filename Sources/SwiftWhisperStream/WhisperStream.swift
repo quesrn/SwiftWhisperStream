@@ -174,5 +174,5 @@ public class WhisperStream: Thread {
 
 fileprivate let spacesPattern = #"\s{2,}"#
 // Non-symbol chars in brackets/parens
-fileprivate let bracketPairsPattern = "\\[[^\\p{L}\\p{N}\\s]+\\]|\\([^\\p{L}\\p{N}\\s]+\\)|\\{[^\\p{L}\\p{N}\\s]+\\}|\\「[^\\p{L}\\p{N}\\s]+\\」|\\『[^\\p{L}\\p{N}\\s]+\\』|\\（[^\\p{L}\\p{N}\\s]+\\）"
+fileprivate let bracketPairsPattern = "\\p{Ps}[^\\p{Pe}]*?\\p{Pe}|\\p{Pi}[^\\p{Pf}]*?\\p{Pf}"
 fileprivate let symbolsPattern = "[#*+/:;<=>^_`|~♩♪♫♬♭♮♯♪]+"
