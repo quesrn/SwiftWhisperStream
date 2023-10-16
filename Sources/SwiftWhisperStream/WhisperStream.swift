@@ -167,11 +167,12 @@ public class WhisperStream: Thread {
         text = text
             .replacingOccurrences(of: bracketPairsPattern, with: " ", options: .regularExpression)
             .replacingOccurrences(of: symbolsPattern, with: " ", options: .regularExpression)
-            .replacingOccurrences(of: "  ", with: " ")
+            .replacingOccurrences(of: spacesPattern, with: " ", options: .regularExpression)
         return text
     }
 }
 
+fileprivate let spacesPattern = #"\s{2,}"#
 // Non-symbol chars in brackets/parens
-fileprivate let bracketPairsPattern = "\\[[^\\p{L}\\p{N}\\s]+\\]|\\([^\\p{L}\\p{N}\\s]+\\)|\\{[^\\p{L}\\p{N}\\s]+\\}|\\「[^\\p{L}\\p{N}\\s]+\\」|\\『[^\\p{L}\\p{N}\\s]+\\』"
+fileprivate let bracketPairsPattern = "\\[[^\\p{L}\\p{N}\\s]+\\]|\\([^\\p{L}\\p{N}\\s]+\\)|\\{[^\\p{L}\\p{N}\\s]+\\}|\\「[^\\p{L}\\p{N}\\s]+\\」|\\『[^\\p{L}\\p{N}\\s]+\\』|\\（[^\\p{L}\\p{N}\\s]+\\）"
 fileprivate let symbolsPattern = "[#*+/:;<=>^_`|~♩♪♫♬♭♮♯♪]+"
