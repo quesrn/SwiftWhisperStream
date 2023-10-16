@@ -63,6 +63,8 @@ public class VAD: ObservableObject {
     }
     
     func activateMicrophone(deviceID: SDL_AudioDeviceID) {
+        return;
+        
         guard SDL_Init(SDL_INIT_AUDIO) >= 0 else {
             print("SDL_Init failed: \(SDL_GetError()!)")
             return

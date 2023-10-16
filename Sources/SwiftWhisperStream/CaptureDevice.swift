@@ -10,7 +10,7 @@ public struct CaptureDevice: Identifiable {
     public let id: Int32
     public let name: String
     
-    public let vad: VAD? = nil// = VAD()
+    public let vad = VAD()
     
     public init(id: Int32, name: String) {
         self.id = id
