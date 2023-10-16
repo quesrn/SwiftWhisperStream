@@ -9,11 +9,11 @@ public struct Segment {
 
 public typealias OrderedSegments = [Segment]
 
-public extension OrderedSegments {
-    var text: any StringProtocol {
-        map { $0.text }.joined()
-    }
-}
+//public extension OrderedSegments {
+//    var text: any StringProtocol {
+//        map { $0.text }.joined()
+//    }
+//}
 
 public class WhisperStream: Thread {
     @Published public private(set) var segments = OrderedSegments()
@@ -105,8 +105,12 @@ public class WhisperStream: Thread {
                         }
                         let speechRatio = Double(speechCoverage) / max(0, Double(t1) - Double(t0))
                         if speechRatio < 0.5 {
-                            print("want to SKIPPED \(speechRatio) \(text != nil ? String(cString: text!) : nil)")
+                            print("SKIPPED \(speechRatio) \(text != nil ? String(cString: text!) : nil)")
 //                            return 0
+                            return stream.callback(
+                                text: nil,
+                                t0: t0,
+                                t1: t1)
                         } else {
                             print("NOT SKIP! \(speechRatio) \(text != nil ? String(cString: text!) : nil)")
                         }
