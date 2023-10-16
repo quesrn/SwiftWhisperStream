@@ -137,9 +137,7 @@ public class WhisperStream: Thread {
             segments.append(Segment(text: "", t0: -1, t1: -1))
         }
         if var text = text {
-            if suppressNonSpeechOutput {
-                text = suppressNonSpeech(text: text)
-            }
+            if suppressNonSpeechOutput { text = suppressNonSpeech(text: text) }
             segments[segments.count - 1] = Segment(text: text, t0: t0, t1: t1)
         }
 
