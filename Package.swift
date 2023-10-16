@@ -31,9 +31,9 @@ let package = Package(
             dependencies: [
                 .product(name: "SDL", package: "SwiftSDL2"),
             ], 
-            exclude: [
-                "ggml-metal.metal",
-            ],
+//            exclude: [
+//                "ggml-metal.metal",
+//            ],
             resources: [
                 .process("ggml-metal.metal"),
             ],
