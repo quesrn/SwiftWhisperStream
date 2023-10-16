@@ -68,7 +68,7 @@ public class WhisperStream: Thread {
                 var params = stream_default_params()
                 params.model = modelCStr
                 params.language = languageCStr
-                params.suppress_non_speech_tokens = true
+                params.suppress_non_speech_tokens = false
                 
                 if let device = device {
                     params.capture_id = device.id
@@ -105,7 +105,7 @@ public class WhisperStream: Thread {
                             speechCoverage += duration
                         }
                         let speechRatio = Double(speechCoverage) / max(0, Double(t1) - Double(t0))
-                        if speechRatio < 0.5 {
+                        if speechRatio < 0.2 {
                             print("?SKIPPED \(speechRatio) \(text != nil ? String(cString: text!) : nil)")
 //                            return 0
 //                            return stream.callback(
