@@ -24,17 +24,17 @@ public class WhisperStream: Thread {
     
     let model: URL
     let device: CaptureDevice?
-    let window: TimeInterval
+//    let window: TimeInterval
     let suppressNonSpeechOutput: Bool
     let language: String
 
     // Define a class-level lock to ensure serial execution of stream_init
     private static let streamInitLock = NSLock()
 
-    public init(model: URL, device: CaptureDevice? = nil, window: TimeInterval = (60 * 60), suppressNonSpeechOutput: Bool = true, language: String? = nil) {
+    public init(model: URL, device: CaptureDevice? = nil/*, window: TimeInterval = (60 * 5)*/, suppressNonSpeechOutput: Bool = false, language: String? = nil) {
         self.model = model
         self.device = device
-        self.window = window
+//        self.window = window
         self.suppressNonSpeechOutput = suppressNonSpeechOutput
         self.language = language?.lowercased() ?? ""
         super.init()
@@ -141,13 +141,13 @@ public class WhisperStream: Thread {
             segments[segments.count - 1] = Segment(text: text, t0: t0, t1: t1)
         }
 
-        var k = 0
-        for segment in segments {
-            if let last = segments.last, last.t0 - segment.t0 > Int64(window * 1000) {
-                k += 1
-            }
-        }
-        segments.removeFirst(k)
+//        var k = 0
+//        for segment in segments {
+//            if let last = segments.last, last.t0 - segment.t0 > Int64(window * 1000) {
+//                k += 1
+//            }
+//        }
+//        segments.removeFirst(k)
 
         return 0
     }
