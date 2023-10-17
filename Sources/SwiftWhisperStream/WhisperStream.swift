@@ -62,6 +62,7 @@ public class WhisperStream: Thread {
     }
 
     func task() {
+        print("STREAM TASK!!")
         device?.activateVAD()
         
         language.withCString { languageCStr in
