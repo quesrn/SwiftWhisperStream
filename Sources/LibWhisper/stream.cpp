@@ -127,6 +127,7 @@ int64_t format_time_point(std::chrono::time_point<std::chrono::high_resolution_c
 
 int stream_audio_clear(stream_context *ctx) {
     ctx->audio->clear();
+    ctx->pcmf32_new.clear();
 }
 
 int stream_run(stream_context *ctx, void *callback_ctx, stream_callback_t callback) {
