@@ -144,7 +144,12 @@ public class WhisperStream: Thread {
             if suppressNonSpeechOutput {
                 text = suppressNonSpeech(text: text)
             }
-            segments[segments.count - 1] = Segment(text: text, t0: t0, t1: t1)
+            if !text.isEmpty {
+                if segments.isEmpty {
+                    segments.append(Segment(text: "", t0: -1, t1: -1))
+                }
+                segments[segments.count - 1] = Segment(text: text, t0: t0, t1: t1)
+            }
         }
 
 //        var k = 0
