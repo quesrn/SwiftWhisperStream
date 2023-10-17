@@ -40,9 +40,9 @@ struct stream_params stream_default_params() {
         /* .step_ms       =*/ 500,
         /* .length_ms     =*/ 5000,
 
-        /* .keep_ms       =*/ 300,
+        /* .keep_ms       =*/ 200,
         /* .capture_id    =*/ -1,
-        /* .max_tokens    =*/ 64,
+        /* .max_tokens    =*/ 32,
         /* .audio_ctx     =*/ 0,
         
         /* .vad_thold     =*/ 0.6f,
