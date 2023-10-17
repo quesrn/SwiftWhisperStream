@@ -137,19 +137,14 @@ public class WhisperStream: Thread {
     }
 
     func callback(text: String?, t0: Int64, t1: Int64) -> Int32 {
-//        if segments.isEmpty || text == nil {
-//            segments.append(Segment(text: "", t0: -1, t1: -1))
-//        }
+        if segments.isEmpty || text == nil {
+            segments.append(Segment(text: "", t0: -1, t1: -1))
+        }
         if var text = text {
             if suppressNonSpeechOutput {
                 text = suppressNonSpeech(text: text)
             }
-            if !text.isEmpty {
-                if segments.isEmpty {
-                    segments.append(Segment(text: "", t0: -1, t1: -1))
-                }
-                segments[segments.count - 1] = Segment(text: text, t0: t0, t1: t1)
-            }
+            segments[segments.count - 1] = Segment(text: text, t0: t0, t1: t1)
         }
 
 //        var k = 0
