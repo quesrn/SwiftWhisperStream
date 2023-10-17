@@ -62,7 +62,6 @@ public class WhisperStream: Thread {
     }
 
     func task() {
-        print("STREAM TASK!!")
         device?.activateVAD()
         
         language.withCString { languageCStr in
@@ -157,6 +156,11 @@ public class WhisperStream: Thread {
 //        segments.removeFirst(k)
 
         return 0
+    }
+    
+    public func clearAudio() {
+        guard let ctx = streamContext else { return }
+        stream_audio_clear(ctx)
     }
     
     public func clearSegments() {

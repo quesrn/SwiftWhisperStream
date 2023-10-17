@@ -36,6 +36,8 @@ typedef struct stream_context *stream_context_t;
 stream_context_t stream_init(stream_params_t params);
 void stream_free(stream_context_t ctx);
 
+int stream_audio_clear(stream_context_t ctx);
+
 typedef int (*stream_callback_t) (const char *text, int64_t t0, int64_t t1, int64_t startTime, void *ctx);
 int stream_run(stream_context_t ctx, void *callback_ctx, stream_callback_t callback);
 
