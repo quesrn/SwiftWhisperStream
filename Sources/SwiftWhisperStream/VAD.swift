@@ -1,6 +1,7 @@
 import Foundation
 import libfvad
 import SDL2
+import LibWhisper
 
 public class VAD: ObservableObject {
     @Published public var isSpeechDetected = false
@@ -149,7 +150,7 @@ public class VAD: ObservableObject {
         var ts = timespec()
         clock_gettime(CLOCK_MONOTONIC, &ts)
         let old = Int64(ts.tv_sec) * 1_000_000 + Int64(ts.tv_nsec) / 1_000
-        let int64Time = Int64(DispatchTime.now().uptimeNanoseconds / 1000)
+        let int64Time = stream_timestamp()
         print("old: \(old)")
         print("new: \(int64Time)")
         return int64Time

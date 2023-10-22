@@ -132,6 +132,10 @@ int stream_audio_clear(stream_context *ctx) {
     ctx->pcmf32_new.clear();
 }
 
+int64_t stream_timestamp() {
+    return format_time_point(std::chrono::high_resolution_clock::now());
+}
+
 int stream_run(stream_context *ctx, void *callback_ctx, stream_callback_t callback) {
     auto params = ctx->params;
     auto whisper = ctx->whisper.get();
