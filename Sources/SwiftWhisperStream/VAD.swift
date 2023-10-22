@@ -165,7 +165,7 @@ public class VAD: ObservableObject {
 
     func removeSpeechDetectionRanges(startTime: Int64, t0: Int64, t1: Int64) {
         speechDetectedAtQueue.sync {
-            speechDetectedAt.removeAll { $0.1 < (startTime + (t0 * 1000)) || $0.0 > (startTime + (t1 * 1000)) }
+//            speechDetectedAt.removeAll { $0.1 < (startTime + (t0 * 1000)) || $0.0 > (startTime + (t1 * 1000)) }
         }
     }
 }
