@@ -148,7 +148,11 @@ public class VAD: ObservableObject {
     private func getCurrentMonotonicTimestamp() -> Int64 {
         var ts = timespec()
         clock_gettime(CLOCK_MONOTONIC, &ts)
-        return Int64(ts.tv_sec) * 1_000_000 + Int64(ts.tv_nsec) / 1_000
+        let old = Int64(ts.tv_sec) * 1_000_000 + Int64(ts.tv_nsec) / 1_000
+        let int64Time = Int64(DispatchTime.now().uptimeNanoseconds)
+        print("old: \(old)")
+        print("new: \(int64Time)")
+        return int64Time
     }
     
     func removeAllSpeechDetectionRanges() {
