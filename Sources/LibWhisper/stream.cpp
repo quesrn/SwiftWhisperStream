@@ -61,7 +61,7 @@ struct stream_params stream_default_params() {
     };
 }
 
-stream_context *stream_init(stream_params params) {
+stream_context *stream_init(stream_params params, void *vad, SDL_AudioCallback rawCallback) {
     auto ctx = std::make_unique<stream_context>();
 
     params.keep_ms = std::min(params.keep_ms, params.step_ms);
@@ -82,7 +82,7 @@ stream_context *stream_init(stream_params params) {
 
     // init audio
     ctx->audio = std::make_unique<audio_async>(params.length_ms);
-    if (!ctx->audio->init(params.capture_id, WHISPER_SAMPLE_RATE)) {
+    if (!ctx->audio->init(params.capture_id, WHISPER_SAMPLE_RATE, vad, rawCallback)) {
         fprintf(stderr, "%s: audio.init() failed!\n", __func__);
         return NULL;
     }

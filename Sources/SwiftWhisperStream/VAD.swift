@@ -63,25 +63,10 @@ public class VAD: ObservableObject {
         fvad_free(inst)
     }
     
-    func activateMicrophone(deviceID: SDL_AudioDeviceID) {
-        guard SDL_Init(SDL_INIT_AUDIO) >= 0 else {
-            print("SDL_Init failed: \(SDL_GetError()!)")
-            return
-        }
-        
-        var desiredSpec = SDL_AudioSpec()
-        var obtainedSpec = SDL_AudioSpec()
-        
-        desiredSpec.freq = sampleRate
-        desiredSpec.format = SDL_AudioFormat(AUDIO_S16) // 16-bit signed, little-endian
-        desiredSpec.channels = 1
-        desiredSpec.samples = samples
-        desiredSpec.callback = { userData, audioBuffer, length in
-            guard let userData = userData else { return }
-            let myself = Unmanaged<VAD>.fromOpaque(userData).takeUnretainedValue()
-            let samples = myself.samples
-            myself.audioDataQueue.sync {
-                guard myself.isMicrophoneActive else { return }
+    func callback(audioBuffer: UnsafeMutablePointer<Uint8>?, length: Int32) {
+            let samples = samples
+            audioDataQueue.sync {
+                guard isMicrophoneActive else { return }
                 
                 let bufferPointer = audioBuffer!.withMemoryRebound(to: Int16.self, capacity: Int(length)) {
                     $0
@@ -90,52 +75,38 @@ public class VAD: ObservableObject {
                 let count = Int(length) / MemoryLayout<Int16>.size
                 
                 // Accumulate audio frames in the buffer
-                myself.audioFrameBuffer.append(contentsOf: Array(UnsafeBufferPointer(start: frames, count: count)))
+                audioFrameBuffer.append(contentsOf: Array(UnsafeBufferPointer(start: frames, count: count)))
                 
                 // Check if we have accumulated 30ms of audio data (480 frames)
-                if myself.audioFrameBuffer.count >= samples {
+                if audioFrameBuffer.count >= samples {
                     // Take the first 480 frames for processing
-                    let framesToProcess = Array(myself.audioFrameBuffer.prefix(Int(samples)))
+                    let framesToProcess = Array(audioFrameBuffer.prefix(Int(samples)))
                     
                     // Make the VAD decision using 30 ms of audio data (480 frames)
-                    let voiceActivity = myself.isSpeech(frames: framesToProcess, count: Int(samples))
+                    let voiceActivity = isSpeech(frames: framesToProcess, count: Int(samples))
                     
                     // Remove all frames from the buffer after processing
-                    myself.audioFrameBuffer.removeAll()
+                    audioFrameBuffer.removeAll()
                     
                     // After processing audio and running inference
-                    let t1 = myself.getCurrentTimestamp() // timestamp in microseconds
+                    let t1 = getCurrentTimestamp() // timestamp in microseconds
 
                     // Calculate t0 based on the logic from stream.cpp
-                    let durationMicroseconds = Int64(framesToProcess.count) * 1_000_000 / Int64(myself.sampleRate)
+                    let durationMicroseconds = Int64(framesToProcess.count) * 1_000_000 / Int64(sampleRate)
                     let t0 = max(0, t1 - durationMicroseconds)
                     
-                    Task { @MainActor [weak myself] in
-                        myself?.isSpeechDetected = voiceActivity
+                    Task { @MainActor [weak self] in
+                        guard let self = self else { return }
+                        isSpeechDetected = voiceActivity
                         if voiceActivity {
-                            myself?.addSpeechDetectionRange(range: (t0, t1))
+                            addSpeechDetectionRange(range: (t0, t1))
                         }
                     }
                 }
             }
-        }
-        desiredSpec.userdata = Unmanaged.passUnretained(self).toOpaque()
-        
-        let audioDeviceID = deviceID // Use the provided SDL device ID
-        if audioDeviceID == 0 {
-            print("SDL_OpenAudioDevice failed: \(SDL_GetError()!)")
-            SDL_Quit()
-            return
-        }
-        
-        let audioDeviceStatus = SDL_OpenAudioDevice(nil, 1, &desiredSpec, &obtainedSpec, 0)
-        if audioDeviceStatus == 0 {
-            print("SDL_OpenAudioDevice failed: \(SDL_GetError()!)")
-            SDL_Quit()
-            return
-        }
-        
-        SDL_PauseAudioDevice(audioDeviceStatus, 0)
+    }
+    
+    func activateMicrophone() {
         isMicrophoneActive = true
     }
     
@@ -143,7 +114,7 @@ public class VAD: ObservableObject {
         guard isMicrophoneActive else { return }
         removeAllSpeechDetectionRanges()
         isMicrophoneActive = false
-        SDL_Quit()
+//        SDL_Quit()
     }
     
     private func getCurrentTimestamp() -> Int64 {

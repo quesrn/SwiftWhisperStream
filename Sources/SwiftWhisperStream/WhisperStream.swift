@@ -63,6 +63,7 @@ public class WhisperStream: Thread {
 
     func task() {
         device?.activateVAD()
+        guard let vad = device?.vad else { return }
         
         language.withCString { languageCStr in
             model.path.withCString { modelCStr in
@@ -87,7 +88,10 @@ public class WhisperStream: Thread {
                     WhisperStream.streamInitLock.unlock()
                 }
                 
-                let ctx = stream_init(params)
+                let ctx = stream_init(params, Unmanaged.passUnretained(vad).toOpaque()) { userData, audioBuffer, length in
+                    let vad = Unmanaged<VAD>.fromOpaque(userData!).takeUnretainedValue()
+                    vad.callback(audioBuffer: audioBuffer, length: length)
+                }
                 streamContext = ctx
                 if ctx == nil {
                     return

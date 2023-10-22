@@ -42,13 +42,11 @@ public struct CaptureDevice: Identifiable {
     }
     
     func activateVAD() {
-        guard let vad = vad else { return }
-        vad.activateMicrophone(deviceID: SDL_AudioDeviceID(id))
+        vad?.activateMicrophone()
     }
     
     func deactivateVAD() {
-        guard let vad = vad else { return }
-        vad.deactivateMicrophone()
+        vad?.deactivateMicrophone()
     }
 }
 

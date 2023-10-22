@@ -1,6 +1,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include <SDL.h>
+#include <SDL_audio.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -33,7 +36,7 @@ stream_params_t stream_default_params();
 
 typedef struct stream_context *stream_context_t;
 
-stream_context_t stream_init(stream_params_t params);
+stream_context_t stream_init(stream_params_t params, void *vad, SDL_AudioCallback rawCallback);
 void stream_free(stream_context_t ctx);
 
 int stream_audio_clear(stream_context_t ctx);

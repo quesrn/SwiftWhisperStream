@@ -12,7 +12,7 @@ audio_async::~audio_async() {
     }
 }
 
-bool audio_async::init(int capture_id, int sample_rate) {
+bool audio_async::init(int capture_id, int sample_rate, void *vad, SDL_AudioCallback rawCallback) {
     SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO);
 
     if (SDL_Init(SDL_INIT_AUDIO) < 0) {
@@ -36,12 +36,16 @@ bool audio_async::init(int capture_id, int sample_rate) {
     SDL_zero(capture_spec_requested);
     SDL_zero(capture_spec_obtained);
 
+    this->vad = vad;
+    this->rawCallback = rawCallback;
+    
     capture_spec_requested.freq     = sample_rate;
     capture_spec_requested.format   = AUDIO_F32;
     capture_spec_requested.channels = 1;
     capture_spec_requested.samples  = 1024;
     capture_spec_requested.callback = [](void * userdata, uint8_t * stream, int len) {
         audio_async * audio = (audio_async *) userdata;
+        audio->rawCallback(audio->vad, stream, len);
         audio->callback(stream, len);
     };
     capture_spec_requested.userdata = this;
