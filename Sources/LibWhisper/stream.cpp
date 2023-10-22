@@ -37,13 +37,13 @@ struct stream_params stream_default_params() {
     return stream_params {
         /* .n_threads     =*/ std::min(4, (int32_t) std::thread::hardware_concurrency()),
         
-        /* .step_ms       =*/ 500,
+        /* .step_ms       =*/ 400,
         /* .length_ms     =*/ 5000,
 
-        /* .keep_ms       =*/ 200,
+        /* .keep_ms       =*/ 250,
         /* .capture_id    =*/ -1,
-        /* .max_tokens    =*/ 32, // 64
-        /* .audio_ctx     =*/ 0, // 768 // https://github.com/ggerganov/whisper.cpp/issues/137#issuecomment-1363301976
+        /* .max_tokens    =*/ 64,
+        /* .audio_ctx     =*/ 768,
         
         /* .vad_thold     =*/ 0.6f,
         /* .freq_thold    =*/ 100.0f,
