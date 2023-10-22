@@ -103,7 +103,7 @@ public class VAD: ObservableObject {
                     myself.audioFrameBuffer.removeAll()
                     
                     // After processing audio and running inference
-                    let t1 = myself.getCurrentMonotonicTimestamp() // Get the current monotonic timestamp in microseconds
+                    let t1 = myself.getCurrentTimestamp() // timestamp in microseconds
 
                     // Calculate t0 based on the logic from stream.cpp
                     let durationMicroseconds = Int64(framesToProcess.count) * 1_000_000 / Int64(myself.sampleRate)
@@ -145,11 +145,11 @@ public class VAD: ObservableObject {
         SDL_Quit()
     }
     
-    private func getCurrentMonotonicTimestamp() -> Int64 {
+    private func getCurrentTimestamp() -> Int64 {
         var ts = timespec()
         clock_gettime(CLOCK_MONOTONIC, &ts)
         let old = Int64(ts.tv_sec) * 1_000_000 + Int64(ts.tv_nsec) / 1_000
-        let int64Time = Int64(DispatchTime.now().uptimeNanoseconds)
+        let int64Time = Int64(DispatchTime.now().uptimeNanoseconds / 1000)
         print("old: \(old)")
         print("new: \(int64Time)")
         return int64Time
@@ -168,6 +168,7 @@ public class VAD: ObservableObject {
     }
 
     func removeSpeechDetectionRanges(startTime: Int64, t0: Int64, t1: Int64) {
+        print("cpp time \(startTime)")
         speechDetectedAtQueue.sync {
             speechDetectedAt.removeAll { $0.1 < (startTime + (t0 * 1000)) || $0.0 > (startTime + (t1 * 1000)) }
         }
