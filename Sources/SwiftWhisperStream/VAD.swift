@@ -147,13 +147,7 @@ public class VAD: ObservableObject {
     }
     
     private func getCurrentTimestamp() -> Int64 {
-        var ts = timespec()
-        clock_gettime(CLOCK_MONOTONIC, &ts)
-        let old = Int64(ts.tv_sec) * 1_000_000 + Int64(ts.tv_nsec) / 1_000
-        let int64Time = stream_timestamp()
-        print("old: \(old)")
-        print("new: \(int64Time)")
-        return int64Time
+        return stream_timestamp()
     }
     
     func removeAllSpeechDetectionRanges() {
@@ -169,7 +163,6 @@ public class VAD: ObservableObject {
     }
 
     func removeSpeechDetectionRanges(startTime: Int64, t0: Int64, t1: Int64) {
-        print("cpp time \(startTime)")
         speechDetectedAtQueue.sync {
             speechDetectedAt.removeAll { $0.1 < (startTime + (t0 * 1000)) || $0.0 > (startTime + (t1 * 1000)) }
         }
