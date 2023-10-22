@@ -46,15 +46,15 @@ let package = Package(
                 .unsafeFlags(["-DNDEBUG"]),
                 .unsafeFlags(["-pthread"]),
                 .unsafeFlags(["-fno-objc-arc"]),
-            ]//,
-//            linkerSettings: [
-//                .linkedFramework("Foundation"),
-//                .linkedFramework("Accelerate"),
-//                .linkedFramework("Metal"),
-//                .linkedFramework("MetalKit"),
-//                .linkedFramework("MetalPerformanceShaders"),
-//            ]),
-            ),
+            ],
+            linkerSettings: [
+                .linkedFramework("Foundation"),
+                .linkedFramework("Accelerate"),
+                .linkedFramework("Metal"),
+                .linkedFramework("MetalKit"),
+                .linkedFramework("MetalPerformanceShaders"),
+            ]),
+//            ),
 //        .testTarget(name: "WhisperTests", dependencies: [.target(name: "SwiftWhisper")], resources: [.copy("TestResources/")])
     ],
     cxxLanguageStandard: CXXLanguageStandard.cxx20
