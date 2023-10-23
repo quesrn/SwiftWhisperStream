@@ -15,6 +15,8 @@ public extension OrderedSegments {
     }
 }
 
+fileprivate let WHISPER_SAMPLE_RATE: Int64 = 16000
+
 public class WhisperStream: Thread {
     @Published public private(set) var segments = OrderedSegments()
     @Published public private(set) var alive = true
@@ -89,6 +91,7 @@ public class WhisperStream: Thread {
                 }
                 
                 let ctx = stream_init(params, Unmanaged.passUnretained(vad).toOpaque()) { userData, audioBuffer, length in
+                    let now = stream_timestamp()
                     let vad = Unmanaged<VAD>.fromOpaque(userData!).takeUnretainedValue()
                     
                     // Process audio data in chunks
@@ -105,10 +108,14 @@ public class WhisperStream: Thread {
                         let bufferPointer = audioBuffer!.advanced(by: Int(bufferOffset)).withMemoryRebound(to: Uint8.self, capacity: Int(chunkSize) * MemoryLayout<Uint8>.size) { ptr in
                             return ptr
                         }
-                        vad.callback(audioBuffer: bufferPointer, length: chunkSize * Int32(MemoryLayout<Uint8>.size))
+                        
+                        let t1: Int64 = now - Int64(bufferOffset) * 1000 / WHISPER_SAMPLE_RATE
+                        // Calculate t0 based on t1 and chunk size
+                        let t0: Int64 = max(0, t1 - Int64(chunkSize) * 1000 / WHISPER_SAMPLE_RATE)
+                        
+                        vad.callback(t0: t0, t1: t1, audioBuffer: bufferPointer, length: chunkSize * Int32(MemoryLayout<Uint8>.size))
                         currentPosition += chunkSize
                     }
-//                    vad.callback(audioBuffer: audioBuffer, length: length)
                 }
                 streamContext = ctx
                 if ctx == nil {

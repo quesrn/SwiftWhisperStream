@@ -63,47 +63,46 @@ public class VAD: ObservableObject {
         fvad_free(inst)
     }
     
-    func callback(audioBuffer: UnsafeMutablePointer<Uint8>?, length: Int32) {
-            let samples = samples
-            audioDataQueue.sync {
-                guard isMicrophoneActive else { return }
+    func callback(t0: Int64, t1: Int64, audioBuffer: UnsafeMutablePointer<Uint8>?, length: Int32) {
+        let samples = samples
+        audioDataQueue.sync {
+            guard isMicrophoneActive else { return }
+            
+            let bufferPointer = audioBuffer!.withMemoryRebound(to: Int16.self, capacity: Int(length)) {
+                $0
+            }
+            let frames = UnsafePointer(bufferPointer)
+            let count = Int(length) / MemoryLayout<Int16>.size
+            
+            // Accumulate audio frames in the buffer
+            audioFrameBuffer.append(contentsOf: Array(UnsafeBufferPointer(start: frames, count: count)))
+            
+            // Check if we have accumulated 30ms of audio data (480 frames)
+            if audioFrameBuffer.count >= samples {
+                // Take the first 480 frames for processing
+                let framesToProcess = Array(audioFrameBuffer.prefix(Int(samples)))
                 
-                let bufferPointer = audioBuffer!.withMemoryRebound(to: Int16.self, capacity: Int(length)) {
-                    $0
-                }
-                let frames = UnsafePointer(bufferPointer)
-                let count = Int(length) / MemoryLayout<Int16>.size
+                // Make the VAD decision using 30 ms of audio data (480 frames)
+                let voiceActivity = isSpeech(frames: framesToProcess, count: Int(samples))
                 
-                // Accumulate audio frames in the buffer
-                audioFrameBuffer.append(contentsOf: Array(UnsafeBufferPointer(start: frames, count: count)))
+                // Remove all frames from the buffer after processing
+                audioFrameBuffer.removeAll()
                 
-                // Check if we have accumulated 30ms of audio data (480 frames)
-                if audioFrameBuffer.count >= samples {
-                    // Take the first 480 frames for processing
-                    let framesToProcess = Array(audioFrameBuffer.prefix(Int(samples)))
-                    
-                    // Make the VAD decision using 30 ms of audio data (480 frames)
-                    let voiceActivity = isSpeech(frames: framesToProcess, count: Int(samples))
-                    
-                    // Remove all frames from the buffer after processing
-                    audioFrameBuffer.removeAll()
-                    
-                    // After processing audio and running inference
-                    let t1 = getCurrentTimestamp() // timestamp in microseconds
-
-                    // Calculate t0 based on the logic from stream.cpp
-                    let durationMicroseconds = Int64(framesToProcess.count) * 1_000_000 / Int64(sampleRate)
-                    let t0 = max(0, t1 - durationMicroseconds)
-                    
-                    Task { @MainActor [weak self] in
-                        guard let self = self else { return }
-                        isSpeechDetected = voiceActivity
-                        if voiceActivity {
-                            addSpeechDetectionRange(range: (t0, t1))
-                        }
+                // After processing audio and running inference
+//                let t1 = getCurrentTimestamp() // timestamp in microseconds
+                // Calculate t0 based on the logic from stream.cpp
+//                let durationMicroseconds = Int64(framesToProcess.count) * 1_000_000 / Int64(sampleRate)
+//                let t0 = max(0, t1 - durationMicroseconds)
+                
+                Task { @MainActor [weak self] in
+                    guard let self = self else { return }
+                    isSpeechDetected = voiceActivity
+                    if voiceActivity {
+                        addSpeechDetectionRange(range: (t0, t1))
                     }
                 }
             }
+        }
     }
     
     func activateMicrophone() {
@@ -115,10 +114,6 @@ public class VAD: ObservableObject {
         removeAllSpeechDetectionRanges()
         isMicrophoneActive = false
 //        SDL_Quit()
-    }
-    
-    private func getCurrentTimestamp() -> Int64 {
-        return stream_timestamp()
     }
     
     func removeAllSpeechDetectionRanges() {
