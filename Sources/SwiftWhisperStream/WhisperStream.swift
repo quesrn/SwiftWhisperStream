@@ -90,7 +90,25 @@ public class WhisperStream: Thread {
                 
                 let ctx = stream_init(params, Unmanaged.passUnretained(vad).toOpaque()) { userData, audioBuffer, length in
                     let vad = Unmanaged<VAD>.fromOpaque(userData!).takeUnretainedValue()
-                    vad.callback(audioBuffer: audioBuffer, length: length)
+                    
+                    // Process audio data in chunks
+                    let chunkSize = Int32(vad.samples)
+                    // Calculate the total number of samples in the input data
+                    let totalSamples = length / Int32(MemoryLayout<Uint8>.size)
+                    // Initialize a variable to keep track of the current position
+                    var currentPosition: Int32 = 0
+                    // Process audio data with a sliding window
+                    while currentPosition + chunkSize <= totalSamples {
+                        // Calculate the offset into the audioBuffer
+                        let bufferOffset = currentPosition * Int32(MemoryLayout<Uint8>.size)
+                        
+                        let bufferPointer = audioBuffer!.advanced(by: Int(bufferOffset)).withMemoryRebound(to: Uint8.self, capacity: Int(chunkSize) * MemoryLayout<Uint8>.size) { ptr in
+                            return ptr
+                        }
+                        vad.callback(audioBuffer: bufferPointer, length: chunkSize * Int32(MemoryLayout<Uint8>.size))
+                        currentPosition += chunkSize
+                    }
+//                    vad.callback(audioBuffer: audioBuffer, length: length)
                 }
                 streamContext = ctx
                 if ctx == nil {
