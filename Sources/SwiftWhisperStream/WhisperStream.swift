@@ -105,8 +105,8 @@ public class WhisperStream: Thread {
                     // Process audio data with a sliding window
                     while currentPosition + chunkSize <= totalSamples {
                         // Calculate the offset into the audioBuffer
-                        let bufferOffset = currentPosition * Int32(MemoryLayout<Uint8>.size)
-                        let bufferPointer = audioBuffer!.advanced(by: Int(bufferOffset)).withMemoryRebound(to: Uint8.self, capacity: Int(chunkSize) * MemoryLayout<Uint8>.size) { ptr in
+                        let bufferOffset = currentPosition * Int32(MemoryLayout<Float32>.size)
+                        let bufferPointer = audioBuffer!.advanced(by: Int(bufferOffset)).withMemoryRebound(to: Float32.self, capacity: Int(chunkSize) * MemoryLayout<Float32>.size) { ptr in
                             return ptr
                         }
                         
@@ -127,7 +127,7 @@ public class WhisperStream: Thread {
 //                        // Calculate t0 based on t1 and chunk size
 //                        let t0: Int64 = max(0, t1 - Int64(chunkSize) * 1000 / WHISPER_SAMPLE_RATE)
                         
-                        vad.callback(t0: t0, t1: t1, audioBuffer: bufferPointer, length: chunkSize * Int32(MemoryLayout<Uint8>.size))
+                        vad.callback(t0: t0, t1: t1, audioBuffer: bufferPointer, length: chunkSize * Int32(MemoryLayout<Float32>.size))
                         currentPosition += chunkSize
                         // Increment t0 for the next iteration
                         t0 = t1
