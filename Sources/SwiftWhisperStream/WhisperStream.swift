@@ -103,7 +103,7 @@ public class WhisperStream: Thread {
                     var currentPosition: Int32 = 0
                     var t0 = now - totalDurationMicroseconds
                     // Process audio data with a sliding window
-                    while currentPosition * chunkSize <= totalSamples {
+                    while currentPosition + chunkSize <= totalSamples {
                         // Calculate the offset into the audioBuffer
                         let bufferOffset = currentPosition * Int32(MemoryLayout<Uint8>.size)
                         let bufferPointer = audioBuffer!.advanced(by: Int(bufferOffset)).withMemoryRebound(to: Uint8.self, capacity: Int(chunkSize) * MemoryLayout<Uint8>.size) { ptr in
