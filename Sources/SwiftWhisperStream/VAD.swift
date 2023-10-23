@@ -63,7 +63,7 @@ public class VAD: ObservableObject {
         fvad_free(inst)
     }
     
-    func callback(t0: Int64, t1: Int64, audioBuffer: UnsafeMutablePointer<Float32>?, length: Int32) {
+    func callback(t0: Int64, t1: Int64, audioBuffer: UnsafeMutablePointer<Uint8>?, length: Int32) {
         let samples = samples
         audioDataQueue.sync {
             guard isMicrophoneActive else { return }

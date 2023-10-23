@@ -106,10 +106,12 @@ public class WhisperStream: Thread {
                     while currentPosition + chunkSize <= totalSamples {
                         // Calculate the offset into the audioBuffer
                         let bufferOffset = currentPosition * Int32(MemoryLayout<Float32>.size)
-                        let bufferPointer = audioBuffer!.advanced(by: Int(bufferOffset)).withMemoryRebound(to: Float32.self, capacity: Int(chunkSize) * MemoryLayout<Float32>.size) { ptr in
+//                        let bufferPointer = audioBuffer!.advanced(by: Int(bufferOffset)).withMemoryRebound(to: Uint8.self, capacity: Int(chunkSize) * MemoryLayout<Float32>.size) { ptr in
+//                            return ptr
+//                        }
+                        let bufferPointer = audioBuffer!.advanced(by: Int(bufferOffset)).withMemoryRebound(to: Float32.self, capacity: Int(chunkSize)) { ptr in
                             return ptr
                         }
-                        
                         // Calculate t1 and t0 in microseconds
                         // let t0 be now minus the size of the audioBuffer as measured in microseconds, knowing that the SDL audioBuffer data has sample rate WHISPER_SAMPLE_RATE; then add the currentPosition times the sample chunkSize to get the starting timestamp of the chunk of audio
                         // let t1 be t0 + the duration of this chunk of audio (expected to be 160 samples chunk size, or in other words, 10ms because the sample rate is 16000)
