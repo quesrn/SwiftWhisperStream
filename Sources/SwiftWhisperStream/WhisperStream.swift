@@ -97,7 +97,7 @@ public class WhisperStream: Thread {
                     // Process audio data in chunks
                     let chunkSize = Int32(vad.samples)
                     // Calculate the total number of samples in the input data
-                    let totalSamples = length / Int32(MemoryLayout<Uint8>.size)
+                    let totalSamples = length / Int32(MemoryLayout<Float32>.size)
                     let totalDurationMicroseconds = (Int64(totalSamples) * 1_000_000) / Int64(WHISPER_SAMPLE_RATE)
                     // Initialize a variable to keep track of the current position
                     var currentPosition: Int32 = 0
