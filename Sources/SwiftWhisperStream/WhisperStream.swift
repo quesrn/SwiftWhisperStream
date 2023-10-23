@@ -109,9 +109,12 @@ public class WhisperStream: Thread {
                             return ptr
                         }
                         
-                        let t1: Int64 = now - Int64(bufferOffset) * 1000 / WHISPER_SAMPLE_RATE
-                        // Calculate t0 based on t1 and chunk size
-                        let t0: Int64 = max(0, t1 - Int64(chunkSize) * 1000 / WHISPER_SAMPLE_RATE)
+                        // Calculate t1 and t0 in microseconds
+                        let t1: Int64 = now - Int64(bufferOffset) * 1_000_000 / Int64(WHISPER_SAMPLE_RATE)
+                        let t0: Int64 = max(0, t1 - Int64(chunkSize) * 1_000_000 / Int64(WHISPER_SAMPLE_RATE)
+//                        let t1: Int64 = now - Int64(bufferOffset) * 1000 / WHISPER_SAMPLE_RATE
+//                        // Calculate t0 based on t1 and chunk size
+//                        let t0: Int64 = max(0, t1 - Int64(chunkSize) * 1000 / WHISPER_SAMPLE_RATE)
                         
                         vad.callback(t0: t0, t1: t1, audioBuffer: bufferPointer, length: chunkSize * Int32(MemoryLayout<Uint8>.size))
                         currentPosition += chunkSize
