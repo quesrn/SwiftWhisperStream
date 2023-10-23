@@ -68,14 +68,24 @@ public class VAD: ObservableObject {
         audioDataQueue.sync {
             guard isMicrophoneActive else { return }
             
-            let bufferPointer = audioBuffer!.withMemoryRebound(to: Int16.self, capacity: Int(length)) {
+            let bufferPointer = audioBuffer!.withMemoryRebound(to: Float32.self, capacity: Int(length)) {
                 $0
             }
             let frames = UnsafePointer(bufferPointer)
-            let count = Int(length) / MemoryLayout<Int16>.size
+            let count = Int(length) / MemoryLayout<Float32>.size
+            
+            // Convert Float32 audio to Int16
+            var int16Frames: [Int16] = []
+            for i in 0..<count {
+                let sample = frames[i]
+                // Perform the conversion, you might need to adjust this based on your specific requirements
+                let int16Sample = Int16(sample * Float32(Int16.max))
+                int16Frames.append(int16Sample)
+            }
             
             // Accumulate audio frames in the buffer
-            audioFrameBuffer.append(contentsOf: Array(UnsafeBufferPointer(start: frames, count: count)))
+//            audioFrameBuffer.append(contentsOf: Array(UnsafeBufferPointer(start: frames, count: count)))
+            audioFrameBuffer.append(contentsOf: int16Frames)
             
             // Check if we have accumulated 30ms of audio data (480 frames)
             if audioFrameBuffer.count >= samples {
