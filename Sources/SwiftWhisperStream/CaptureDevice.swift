@@ -37,7 +37,7 @@ public struct CaptureDevice: Identifiable {
         }
     }
     
-    public func applicationWillTerminate() {
+    public static func applicationWillTerminate() {
 //        SDL_CloseAudioDevice(SDL_AudioDeviceID(id))
         SDL_Quit()
     }
