@@ -37,8 +37,8 @@ public struct CaptureDevice: Identifiable {
         }
     }
     
-    public static func applicationWillTerminate() {
-        SDL_Quit()
+    public func close() {
+        SDL_CloseAudioDevice(SDL_AudioDeviceID(id))
     }
     
     func activateVAD() {
