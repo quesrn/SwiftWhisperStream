@@ -13,3 +13,4 @@ extern int SDL_GetNumAudioDevices(int iscapture);
 extern const char * SDL_GetAudioDeviceName(int index, int iscapture);
 
 #import "stream.h"
+#import "whisper.h"
