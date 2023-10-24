@@ -51,7 +51,7 @@ struct stream_params stream_default_params() {
         /* .speed_up      =*/ false,
         /* .translate     =*/ false,
         /* .print_special =*/ false,
-        /* .no_context    =*/ true,
+        /* .no_context    =*/ false, // true
         /* .no_timestamps =*/ false,
         /* .suppress_non_speech_tokens =*/ false,
 
