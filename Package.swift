@@ -25,6 +25,7 @@ let package = Package(
             ]),
         .target(name: "LibWhisper", dependencies: [
             .target(name: "whisper_cpp"),
+            .product(name: "SDL", package: "SwiftSDL2"),
         ]),
         .target(
             name: "whisper_cpp",

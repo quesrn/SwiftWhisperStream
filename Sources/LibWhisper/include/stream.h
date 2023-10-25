@@ -1,8 +1,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include <SDL.h>
-#include <SDL_audio.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_audio.h>
 
 #ifdef __cplusplus
 extern "C" {
