@@ -32,18 +32,29 @@ let package = Package(
             dependencies: [
                 .product(name: "SDL", package: "SwiftSDL2"),
             ], 
-//            exclude: [
-//                "ggml-metal.metal",
-//            ],
+            exclude: [
+                "Resources/metal/ggml-metal_dadbed9.metal",
+                "Resources/metal/ggml-metal_from-llmfarm.metal",
+            ],
             resources: [
-                .process("ggml-metal.metal"),
+//                .process("ggml-metal.metal"),
+                .copy("Resources/tokenizers"),
+                .copy("Resources/metal")
             ],
             publicHeadersPath: "include",
             cSettings: [
+                .unsafeFlags(["-Ofast"]), //comment this if you need to Debug llama_cpp
+//                .unsafeFlags(["-O3"]),
+                .unsafeFlags(["-mfma","-mfma","-mavx","-mavx2","-mf16c","-msse3","-mssse3"]), //for Intel CPU
+                .unsafeFlags(["-DGGML_METAL_NDEBUG"]),
+                .unsafeFlags(["-DGGML_USE_K_QUANTS"]),
+                .unsafeFlags(["-DSWIFT_PACKAGE"]),
+                .unsafeFlags(["-w"]),    // ignore all warnings
+                //                .unsafeFlags(["-DGGML_QKK_64"]), // Dont forget to comment this if you dont use QKK_64
+                
                 .unsafeFlags(["-Wno-shorten-64-to-32"]),
                 .define("GGML_USE_ACCELERATE", .when(platforms: [.macOS, .macCatalyst, .iOS])),
                 .define("GGML_USE_METAL", .when(platforms: [.macOS, .macCatalyst, .iOS])),
-                .unsafeFlags(["-O3"]),
                 .unsafeFlags(["-DNDEBUG"]),
                 .unsafeFlags(["-pthread"]),
                 .unsafeFlags(["-fno-objc-arc"]),

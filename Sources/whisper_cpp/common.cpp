@@ -44,6 +44,8 @@ bool gpt_params_parse(int argc, char ** argv, gpt_params & params) {
             params.prompt = get_next_arg(i, argc, argv, arg, params);
         } else if (arg == "-n" || arg == "--n_predict") {
             params.n_predict = std::stoi(get_next_arg(i, argc, argv, arg, params));
+        } else if (arg == "-np" || arg == "--n_parallel") {
+            params.n_parallel = std::stoi(get_next_arg(i, argc, argv, arg, params));
         } else if (arg == "--top_k") {
             params.top_k = std::stoi(get_next_arg(i, argc, argv, arg, params));
         } else if (arg == "--top_p") {
@@ -806,4 +808,29 @@ void sam_print_usage(int /*argc*/, char ** argv, const sam_params & params) {
     fprintf(stderr, "  -o FNAME, --out FNAME\n");
     fprintf(stderr, "                        output file (default: %s)\n", params.fname_out.c_str());
     fprintf(stderr, "\n");
+}
+
+
+void process_escapes(std::string& input) {
+    std::size_t input_len = input.length();
+    std::size_t output_idx = 0;
+
+    for (std::size_t input_idx = 0; input_idx < input_len; ++input_idx) {
+        if (input[input_idx] == '\\' && input_idx + 1 < input_len) {
+            switch (input[++input_idx]) {
+                case 'n':  input[output_idx++] = '\n'; break;
+                case 'r':  input[output_idx++] = '\r'; break;
+                case 't':  input[output_idx++] = '\t'; break;
+                case '\'': input[output_idx++] = '\''; break;
+                case '\"': input[output_idx++] = '\"'; break;
+                case '\\': input[output_idx++] = '\\'; break;
+                default:   input[output_idx++] = '\\';
+                           input[output_idx++] = input[input_idx]; break;
+            }
+        } else {
+            input[output_idx++] = input[input_idx];
+        }
+    }
+
+    input.resize(output_idx);
 }
