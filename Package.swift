@@ -10,6 +10,7 @@ let package = Package(
     ],
     products: [
         .library(name: "SwiftWhisperStream", targets: ["SwiftWhisperStream"]),
+        .library(name: "SwiftLlama", targets: ["SwiftLlama"]),
     ],
     dependencies: [
         .package(url: "https://github.com/lake-of-fire/SwiftSDL2.git", branch: "master"),
@@ -23,6 +24,9 @@ let package = Package(
                 .target(name: "whisper_cpp"),
                 .target(name: "LibWhisper"),
             ]),
+        .target(name: "SwiftLlama", dependencies: [
+            .target(name: "whisper_cpp"),
+        ]),
         .target(name: "LibWhisper", dependencies: [
             .target(name: "whisper_cpp"),
             .product(name: "SDL", package: "SwiftSDL2"),
