@@ -11,8 +11,8 @@ import whisper_cpp
 public enum ModelInference {
     case LLama_bin
     case LLama_gguf
-    case GPTNeox
-    case GPT2
+//    case GPTNeox
+//    case GPT2
     case Replit
     case Starcoder
     case Starcoder_gguf
@@ -20,7 +20,6 @@ public enum ModelInference {
 }
 
 public class AI {
-    
     var aiQueue = DispatchQueue(label: "LLMFarm-Main", qos: .userInitiated, attributes: .concurrent, autoreleaseFrequency: .inherit, target: nil)
     
     //var model: Model!
@@ -28,8 +27,6 @@ public class AI {
     public var modelPath: String
     public var modelName: String
     public var chatName: String
-    
-    
     
     public var flagExit = false
     private(set) var flagResponding = false
@@ -48,10 +45,10 @@ public class AI {
                 model = try LLaMa_dadbed9(path: self.modelPath, contextParams: contextParams)
             case .LLama_gguf:
                 model = try LLaMa(path: self.modelPath, contextParams: contextParams)
-            case .GPTNeox:
-                model = try GPTNeoX(path: self.modelPath, contextParams: contextParams)
-            case .GPT2:
-                model = try GPT2(path: self.modelPath, contextParams: contextParams)
+//            case .GPTNeox:
+//                model = try GPTNeoX(path: self.modelPath, contextParams: contextParams)
+//            case .GPT2:
+//                model = try GPT2(path: self.modelPath, contextParams: contextParams)
             case .Replit:
                 model = try Replit(path: self.modelPath, contextParams: contextParams)
             case .Starcoder:
