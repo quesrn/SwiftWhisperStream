@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import llmfarm_core_cpp
+import whisper_cpp
 
 public enum ModelLoadError: Error {
     // Throw when an invalid password is entered

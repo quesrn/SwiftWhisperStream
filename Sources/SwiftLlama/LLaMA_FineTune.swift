@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import llmfarm_core_cpp
+import whisper_cpp
 
 var aaa = 1
 var LLaMa_FineTune_obj_ptr:UnsafeMutableRawPointer? = nil

@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import llmfarm_core_cpp
+import whisper_cpp
 
 public enum ModelInference {
     case LLama_bin
