@@ -12,6 +12,7 @@ let package = Package(
         .library(name: "SwiftWhisperStream", targets: ["SwiftWhisperStream"]),
         .library(name: "SwiftLlama", targets: ["SwiftLlama"]),
         .library(name: "whisper_cpp", targets: ["whisper_cpp"]),
+        .library(name: "ggml_metal", targets: ["ggml_metal"]),
     ],
     dependencies: [
         .package(url: "https://github.com/lake-of-fire/SwiftSDL2.git", branch: "master"),
@@ -33,21 +34,52 @@ let package = Package(
             .product(name: "SDL", package: "SwiftSDL2"),
         ]),
         .target(
-            name: "whisper_cpp",
-            dependencies: [
-                .product(name: "SDL", package: "SwiftSDL2"),
-            ], 
+            name: "ggml_metal",
+            dependencies: ["whisper_cpp"],
             exclude: [
 //                "Resources/metal/ggml-metal_dadbed9.metal",
                 "Resources/metal/ggml-metal_from-llmfarm.metal",
             ],
             resources: [
 //                .process("ggml-metal.metal"),
-                .copy("Resources/tokenizers"),
+//                .copy("Resources/tokenizers"),
                 .copy("Resources/metal")
             ],
             publicHeadersPath: "include",
-            cSettings: [
+            cxxSettings: [
+                .unsafeFlags(["-Ofast"]), //comment this if you need to Debug llama_cpp
+                .unsafeFlags(["-DGGML_METAL_NDEBUG"]),
+                .unsafeFlags(["-DGGML_USE_K_QUANTS"]),
+//                .unsafeFlags(["-DSWIFT_PACKAGE"]),
+//                .unsafeFlags(["-w"]),    // ignore all warnings
+                //                .unsafeFlags(["-DGGML_QKK_64"]), // Dont forget to comment this if you dont use QKK_64
+                
+//                .unsafeFlags(["-Wno-shorten-64-to-32"]),
+                .define("GGML_USE_ACCELERATE", .when(platforms: [.macOS, .macCatalyst, .iOS])),
+                .define("GGML_USE_METAL", .when(platforms: [.macOS, .macCatalyst, .iOS])),
+                .unsafeFlags(["-DNDEBUG"]),
+                .unsafeFlags(["-pthread"]),
+                .unsafeFlags(["-fno-objc-arc"]),
+//            ]),
+            ]
+//            swiftSettings: [.interoperabilityMode(.Cxx)]
+        ),
+        .target(
+            name: "whisper_cpp",
+            dependencies: [
+                .product(name: "SDL", package: "SwiftSDL2"),
+            ], 
+//            exclude: [
+//                "Resources/metal/ggml-metal_dadbed9.metal",
+//                "Resources/metal/ggml-metal_from-llmfarm.metal",
+//            ],
+            resources: [
+//                .process("ggml-metal.metal"),
+                .copy("Resources/tokenizers"),
+//                .copy("Resources/metal")
+            ],
+            publicHeadersPath: "include",
+            cxxSettings: [
                 .unsafeFlags(["-Ofast"]), //comment this if you need to Debug llama_cpp
 //                .unsafeFlags(["-O3"]),
                 .unsafeFlags(["-mfma","-mfma","-mavx","-mavx2","-mf16c","-msse3","-mssse3"]), //for Intel CPU
@@ -64,13 +96,6 @@ let package = Package(
                 .unsafeFlags(["-pthread"]),
                 .unsafeFlags(["-fno-objc-arc"]),
             ],
-//            swiftSettings: [.interoperabilityMode(.Cxx)],
-            linkerSettings: [
-                .linkedFramework("Foundation"),
-                .linkedFramework("Accelerate"),
-                .linkedFramework("Metal"),
-                .linkedFramework("MetalKit"),
-                .linkedFramework("MetalPerformanceShaders"),
-            ]),
+            swiftSettings: [.interoperabilityMode(.Cxx)])
     ],
     cxxLanguageStandard: CXXLanguageStandard.cxx20)

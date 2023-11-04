@@ -4,7 +4,7 @@
 #endif
 
 #ifdef GGML_USE_METAL
-#  include "ggml-metal.h"
+#include "ggml-metal.h"
 #endif
 
 #ifdef WHISPER_USE_OPENVINO

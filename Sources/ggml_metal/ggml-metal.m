@@ -348,8 +348,10 @@ struct ggml_metal_context * ggml_metal_init(int n_cb) {
 void ggml_metal_free(struct ggml_metal_context * ctx) {
     GGML_METAL_LOG_INFO("%s: deallocating\n", __func__);
 #define GGML_METAL_DEL_KERNEL(name) \
-    [ctx->function_##name release]; \
-    [ctx->pipeline_##name release];
+    ctx->function_##name = nil; \
+    ctx->pipeline_##name = nil;
+//    [ctx->function_##name release]; \
+//    [ctx->pipeline_##name release];
 
     GGML_METAL_DEL_KERNEL(add);
     GGML_METAL_DEL_KERNEL(add_row);
@@ -418,14 +420,15 @@ void ggml_metal_free(struct ggml_metal_context * ctx) {
 #undef GGML_METAL_DEL_KERNEL
 
     for (int i = 0; i < ctx->n_buffers; ++i) {
-        [ctx->buffers[i].metal release];
+        ctx->buffers[i].metal = nil;
     }
 
-    [ctx->library release];
-    [ctx->queue release];
-    [ctx->device release];
+    ctx->library = nil;
+    ctx->queue = nil;
+    ctx->device = nil;
 
-    dispatch_release(ctx->d_queue);
+//    dispatch_release(ctx->d_queue);
+    ctx->d_queue = nil;
 
     free(ctx);
 }
