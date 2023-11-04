@@ -46,7 +46,7 @@ let package = Package(
                 .copy("Resources/metal")
             ],
             publicHeadersPath: "include",
-            cSettings: [
+            cxxSettings: [
                 .unsafeFlags(["-Ofast"]), //comment this if you need to Debug llama_cpp
 //                .unsafeFlags(["-O3"]),
                 .unsafeFlags(["-mfma","-mfma","-mavx","-mavx2","-mf16c","-msse3","-mssse3"]), //for Intel CPU
@@ -62,16 +62,14 @@ let package = Package(
                 .unsafeFlags(["-DNDEBUG"]),
                 .unsafeFlags(["-pthread"]),
                 .unsafeFlags(["-fno-objc-arc"]),
-            ]//,
-//            linkerSettings: [
-//                .linkedFramework("Foundation"),
-//                .linkedFramework("Accelerate"),
-//                .linkedFramework("Metal"),
-//                .linkedFramework("MetalKit"),
-//                .linkedFramework("MetalPerformanceShaders"),
-//            ]),
-            ),
-//        .testTarget(name: "WhisperTests", dependencies: [.target(name: "SwiftWhisper")], resources: [.copy("TestResources/")])
+            ],
+            swiftSettings: [.interoperabilityMode(.Cxx)],
+            linkerSettings: [
+                .linkedFramework("Foundation"),
+                .linkedFramework("Accelerate"),
+                .linkedFramework("Metal"),
+                .linkedFramework("MetalKit"),
+                .linkedFramework("MetalPerformanceShaders"),
+            ]),
     ],
-    cxxLanguageStandard: CXXLanguageStandard.cxx20
-)
+    cxxLanguageStandard: CXXLanguageStandard.cxx20)
