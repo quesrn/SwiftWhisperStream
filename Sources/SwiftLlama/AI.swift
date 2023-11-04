@@ -9,14 +9,14 @@ import Foundation
 import whisper_cpp
 
 public enum ModelInference {
-    case LLama_bin
+//    case LLama_bin
     case LLama_gguf
 //    case GPTNeox
 //    case GPT2
-    case Replit
-    case Starcoder
-    case Starcoder_gguf
-    case RWKV
+//    case Replit
+//    case Starcoder
+//    case Starcoder_gguf
+//    case RWKV
 }
 
 public class AI {
@@ -41,22 +41,22 @@ public class AI {
         print("AI init")
         do{
             switch aiModel {
-            case .LLama_bin:
-                model = try LLaMa_dadbed9(path: self.modelPath, contextParams: contextParams)
+//            case .LLama_bin:
+//                model = try LLaMa_dadbed9(path: self.modelPath, contextParams: contextParams)
             case .LLama_gguf:
                 model = try LLaMa(path: self.modelPath, contextParams: contextParams)
 //            case .GPTNeox:
 //                model = try GPTNeoX(path: self.modelPath, contextParams: contextParams)
 //            case .GPT2:
 //                model = try GPT2(path: self.modelPath, contextParams: contextParams)
-            case .Replit:
-                model = try Replit(path: self.modelPath, contextParams: contextParams)
-            case .Starcoder:
-                model = try Starcoder(path: self.modelPath, contextParams: contextParams)
-            case .Starcoder_gguf:
-                model = try LLaMa(path: self.modelPath, contextParams: contextParams)
-            case .RWKV:
-                model = try RWKV(path: self.modelPath, contextParams: contextParams)
+//            case .Replit:
+//                model = try Replit(path: self.modelPath, contextParams: contextParams)
+//            case .Starcoder:
+//                model = try Starcoder(path: self.modelPath, contextParams: contextParams)
+//            case .Starcoder_gguf:
+//                model = try LLaMa(path: self.modelPath, contextParams: contextParams)
+//            case .RWKV:
+//                model = try RWKV(path: self.modelPath, contextParams: contextParams)
             }
             return true
         }
@@ -108,11 +108,9 @@ public class AI {
                 self.flagResponding = false
                 completion(output ?? "[Error]")
             }
-            
         }
     }
 }
-
 
 private typealias _ModelProgressCallback = (_ progress: Float, _ userData: UnsafeMutableRawPointer?) -> Void
 

@@ -4,9 +4,10 @@
 //#include "./spm-headers/llama.h"
 #include "common.h"
 #include "common-ggml.h"
-#include "./include/rwkv.h"
+//#include "./include/rwkv.h"
 #include "grammar-parser.h"
-#include "ggml_dadbed9.h"
+//#include "ggml_dadbed9.h"
+#include "ggml.h"
 #include <cassert>
 #include <cmath>
 #include <cstdio>
@@ -148,102 +149,35 @@ int gpt_base_tokenize(
     return res.size();
 }
 
-void gpt_base_shift_kv_cache(struct gpt_base_context * ctx, int n) {
-    auto & model = ctx->model;
-    auto & kv_self = model.kv_self;
-    auto & hparams = model.hparams;
-    auto n_layer = hparams.n_layer;
-    auto n_embd = hparams.n_embd;
-    auto n_ctx = hparams.n_ctx;
-    for(int il = 0; il < n_layer; il++) {
-        // K: Embeddings are in regular order so moving them is easy as copying the memory
-        {
-            int elem_byte_size = ggml_dadbed9_element_size(kv_self.k);
-            uint8_t * dst_ptr = ((uint8_t *)kv_self.k->data) + (elem_byte_size * n_embd * (il * n_ctx));
-            uint8_t * src_ptr = ((uint8_t *)kv_self.k->data) + (elem_byte_size * n_embd * (il * n_ctx + n));
-            memcpy(dst_ptr, src_ptr, elem_byte_size * n_embd * (n_ctx - n));
-        }
-        
-        // V: Embeddings are transposed so each embedding element must be copied separately
-        {
-            int elem_byte_size = ggml_dadbed9_element_size(kv_self.v);
-            for(int i = 0; i < n_embd; i++) {
-                uint8_t * dst_ptr = ((uint8_t *)kv_self.v->data) + (elem_byte_size * (il * n_ctx * i));
-                uint8_t * src_ptr = ((uint8_t *)kv_self.v->data) + (elem_byte_size * (il * n_ctx * i + n));
-                memcpy(dst_ptr, src_ptr, elem_byte_size * (n_ctx - n));
-            }
-        }
-    }
-}
 
-
-
-int32_t gpt_base_sample(struct gpt_base_context * ctx, int top_k, float top_p, float temp) {
-    const int64_t t_start_sample_us = ggml_dadbed9_time_us();
-    int n_logits = ctx->vocab.id_to_token.size();    
-
-//    gpt_vocab::id smpl = gpt_sample_top_k_top_p(n_logits, ctx->logits.data() + (ctx->logits.size() - ctx->vocab.id_to_token.size()), top_k, top_p, temp, ctx->rng);
-    gpt_vocab::id smpl = gpt_sample_top_k_top_p(ctx->vocab, ctx->logits.data() + (ctx->logits.size() - ctx->vocab.id_to_token.size()), top_k, top_p, temp, ctx->rng);
-    if (ctx) {
-        ctx->t_sample_us += ggml_dadbed9_time_us() - t_start_sample_us;
-    }
-    return  smpl;
-}
-
-
-int32_t gpt_base_sample_repeat(struct gpt_base_context * ctx,
-                               const int32_t * last_n_tokens_data,
-                               size_t last_n_tokens_data_size,
-                               int top_k, float top_p, float temp,
-                               int repeat_last_n,
-                               float repeat_penalty) {
-    const int64_t t_start_sample_us = ggml_dadbed9_time_us();
-    int n_logits = ctx->vocab.id_to_token.size();
-//    gpt_vocab::id smpl = gpt_sample_top_k_top_p_repeat(n_logits, ctx->logits.data() + (ctx->logits.size() - ctx->vocab.id_to_token.size()),
-//                                                       last_n_tokens_data,last_n_tokens_data_size,
-//                                                       top_k, top_p, temp,
-//                                                       repeat_last_n,repeat_penalty,
-//                                                       ctx->rng);
-    gpt_vocab::id smpl = gpt_sample_top_k_top_p_repeat(ctx->vocab, ctx->logits.data() + (ctx->logits.size() - ctx->vocab.id_to_token.size()),
-                                                       last_n_tokens_data,last_n_tokens_data_size,
-                                                       top_k, top_p, temp,
-                                                       repeat_last_n,repeat_penalty,
-                                                       ctx->rng);
-    if (ctx) {
-        ctx->t_sample_us += ggml_dadbed9_time_us() - t_start_sample_us;
-    }
-    return  smpl;
-}
-
-
-void rwkv_tokenize(){
-    
-}
-
-void rwkv_init_logits(struct rwkv_context * model) {
-
-//    struct rwkv_context * model = rwkv_init_from_file(model_path, N_THREADS);
-//    enum rwkv_error_flags error = rwkv_get_last_error(NULL);
-//    ASSERT(error == 0, "Unexpected error %d", error);
+//void rwkv_tokenize(){
+//    
+//}
 //
-//#ifdef GGML_dadbed9_USE_CUBLAS
-//    ASSERT(rwkv_gpu_offload_layers(model, rwkv_get_n_layer(model)), "Failed to offload layers to GPU");
-//#endif
-
-    const size_t n_vocab = rwkv_get_logits_len(model);
-
-
-    float * state = (float * )malloc(sizeof(float) * rwkv_get_state_len(model));
-    float * logits = (float * )malloc(sizeof(float) * n_vocab);
-
-    uint32_t prompt_seq[] = { 10002, 209, 312, 209, 74 };
-
-    const size_t prompt_length = 4;
-
-    rwkv_init_state(model, state);
-    rwkv_eval_sequence(model, prompt_seq, prompt_length, state, state, logits);
-
-}
+//void rwkv_init_logits(struct rwkv_context * model) {
+//
+////    struct rwkv_context * model = rwkv_init_from_file(model_path, N_THREADS);
+////    enum rwkv_error_flags error = rwkv_get_last_error(NULL);
+////    ASSERT(error == 0, "Unexpected error %d", error);
+////
+////#ifdef GGML_dadbed9_USE_CUBLAS
+////    ASSERT(rwkv_gpu_offload_layers(model, rwkv_get_n_layer(model)), "Failed to offload layers to GPU");
+////#endif
+//
+//    const size_t n_vocab = rwkv_get_logits_len(model);
+//
+//
+//    float * state = (float * )malloc(sizeof(float) * rwkv_get_state_len(model));
+//    float * logits = (float * )malloc(sizeof(float) * n_vocab);
+//
+//    uint32_t prompt_seq[] = { 10002, 209, 312, 209, 74 };
+//
+//    const size_t prompt_length = 4;
+//
+//    rwkv_init_state(model, state);
+//    rwkv_eval_sequence(model, prompt_seq, prompt_length, state, state, logits);
+//
+//}
 
 //int32_t rwkv_sample(int n_logits, float * logits, int top_k, float top_p, float temp) {
 //    std::mt19937 rng = std::mt19937(time(NULL));
@@ -337,22 +271,4 @@ struct llama_grammar* llama_load_grammar(const char* grammar_path){
     std::vector<const llama_grammar_element *> grammar_rules(parsed_grammar.c_rules());
     grammar = llama_grammar_init(grammar_rules.data(), grammar_rules.size(), parsed_grammar.symbol_ids.at("root"));
     return grammar;
-}
-
-void llama_sample_grammar_for_dadbed9(struct llama_context * ctx, llama_dadbed9_token_data_array * candidates, const struct llama_grammar * grammar ) {
-    llama_sample_grammar(ctx, (llama_token_data_array *)candidates, grammar );
-}
-
-
-llama_token llama_sample_token_for_dadbed9(struct llama_context * ctx, llama_dadbed9_token_data_array * candidates ) {
-    return llama_sample_token(ctx, (llama_token_data_array *)candidates );
-}
-
-
-llama_token llama_sample_token_mirostat_for_dadbed9(struct llama_context * ctx, llama_dadbed9_token_data_array * candidates,float tau,float   eta,int   m,float * mu,int vocabSize ) {
-    return llama_sample_token_mirostat(ctx, (llama_token_data_array *)candidates,tau,eta,m,mu,vocabSize );
-}
-
-llama_token llama_sample_token_mirostat_v2_for_dadbed9(struct llama_context * ctx, llama_dadbed9_token_data_array * candidates,float tau,float   eta, float * mu ) {
-    return llama_sample_token_mirostat_v2(ctx, (llama_token_data_array *)candidates,tau,eta,mu );
 }

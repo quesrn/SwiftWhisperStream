@@ -3,7 +3,8 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include "ggml_dadbed9.h"
+//#include "ggml_dadbed9.h"
+#include "ggml.h"
 #include "common.h"
 
 #include <cassert>
@@ -65,10 +66,10 @@ struct gpt_buffer {
 
 
 struct gpt_kv_cache {
-    struct ggml_dadbed9_tensor * k;
-    struct ggml_dadbed9_tensor * v;
+    struct ggml_tensor * k;
+    struct ggml_tensor * v;
 
-    struct ggml_dadbed9_context * ctx = NULL;
+    struct ggml_context * ctx = NULL;
 
     gpt_buffer buf;
 
@@ -76,42 +77,10 @@ struct gpt_kv_cache {
 
     ~gpt_kv_cache() {
         if (ctx) {
-            ggml_dadbed9_free(ctx);
+            ggml_free(ctx);
         }
     }
 };
-
-
-static bool kv_cache_init(
-        const struct gpt_base_hparams & hparams,
-             struct gpt_kv_cache & cache,
-                           ggml_dadbed9_type   wtype,
-                                 int   n_ctx) {
-    const int n_embd  = hparams.n_embd;
-    const int n_layer = hparams.n_layer;
-
-    const int64_t n_mem      = (int64_t)n_layer*n_ctx;
-    const int64_t n_elements = n_embd*n_mem;
-
-    cache.buf.resize(2u*n_elements*ggml_dadbed9_type_size(wtype) + 2u*MB);
-
-    struct ggml_dadbed9_init_params params;
-    params.mem_size   = cache.buf.size;
-    params.mem_buffer = cache.buf.addr;
-    params.no_alloc   = false;
-
-    cache.ctx = ggml_dadbed9_init(params);
-
-    if (!cache.ctx) {
-        fprintf(stderr, "%s: failed to allocate memory for kv cache\n", __func__);
-        return false;
-    }
-
-    cache.k = ggml_dadbed9_new_tensor_1d(cache.ctx, wtype, n_elements);
-    cache.v = ggml_dadbed9_new_tensor_1d(cache.ctx, wtype, n_elements);
-
-    return true;
-}
 
 
 
@@ -123,25 +92,25 @@ struct gpt_base_model {
     struct gpt_kv_cache kv_self;
 
     // normalization
-    struct ggml_dadbed9_tensor * ln_f_g;
-    struct ggml_dadbed9_tensor * ln_f_b;
+    struct ggml_tensor * ln_f_g;
+    struct ggml_tensor * ln_f_b;
 
-    struct ggml_dadbed9_tensor * wte;     // position embedding
-    struct ggml_dadbed9_tensor * wpe;     //    token embedding
-    struct ggml_dadbed9_tensor * lm_head; // language model head
+    struct ggml_tensor * wte;     // position embedding
+    struct ggml_tensor * wpe;     //    token embedding
+    struct ggml_tensor * lm_head; // language model head
 
     
 
     // key + value memory
-    struct ggml_dadbed9_tensor * memory_k;
-    struct ggml_dadbed9_tensor * memory_v;
+    struct ggml_tensor * memory_k;
+    struct ggml_tensor * memory_v;
 
     //
-    struct ggml_dadbed9_context * ctx;
-    std::map<std::string, struct ggml_dadbed9_tensor *> tensors;
+    struct ggml_context * ctx;
+    std::map<std::string, struct ggml_tensor *> tensors;
     virtual ~gpt_base_model() {
         if (ctx) {
-            ggml_dadbed9_free(ctx);
+            ggml_free(ctx);
         }
     }
 };

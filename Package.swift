@@ -11,6 +11,7 @@ let package = Package(
     products: [
         .library(name: "SwiftWhisperStream", targets: ["SwiftWhisperStream"]),
         .library(name: "SwiftLlama", targets: ["SwiftLlama"]),
+        .library(name: "whisper_cpp", targets: ["whisper_cpp"]),
     ],
     dependencies: [
         .package(url: "https://github.com/lake-of-fire/SwiftSDL2.git", branch: "master"),
@@ -37,7 +38,7 @@ let package = Package(
                 .product(name: "SDL", package: "SwiftSDL2"),
             ], 
             exclude: [
-                "Resources/metal/ggml-metal_dadbed9.metal",
+//                "Resources/metal/ggml-metal_dadbed9.metal",
                 "Resources/metal/ggml-metal_from-llmfarm.metal",
             ],
             resources: [
@@ -46,7 +47,7 @@ let package = Package(
                 .copy("Resources/metal")
             ],
             publicHeadersPath: "include",
-            cxxSettings: [
+            cSettings: [
                 .unsafeFlags(["-Ofast"]), //comment this if you need to Debug llama_cpp
 //                .unsafeFlags(["-O3"]),
                 .unsafeFlags(["-mfma","-mfma","-mavx","-mavx2","-mf16c","-msse3","-mssse3"]), //for Intel CPU
@@ -63,7 +64,7 @@ let package = Package(
                 .unsafeFlags(["-pthread"]),
                 .unsafeFlags(["-fno-objc-arc"]),
             ],
-            swiftSettings: [.interoperabilityMode(.Cxx)],
+//            swiftSettings: [.interoperabilityMode(.Cxx)],
             linkerSettings: [
                 .linkedFramework("Foundation"),
                 .linkedFramework("Accelerate"),

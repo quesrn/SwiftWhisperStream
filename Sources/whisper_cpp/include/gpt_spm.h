@@ -4,10 +4,9 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include "llama_dadbed9.h"
 #include "llama.h"
 
-#include "../ggml_dadbed9.h"
+//#include "../ggml_dadbed9.h"
 
 
 
@@ -123,25 +122,15 @@ int gpt_base_tokenize(
                          int   n_max_tokens,
                         bool   add_bos);
 
-void gpt_base_shift_kv_cache(struct gpt_base_context * ctx, int n);
 
-
-int32_t gpt_base_sample(struct gpt_base_context * ctx, int top_k, float top_p, float temp);
-int32_t gpt_base_sample_repeat(struct gpt_base_context * ctx,
-                                           const int32_t * last_n_tokens_data,
-                                           size_t last_n_tokens_data_size,
-                                           int top_k, float top_p, float temp,
-                                           int repeat_last_n,
-                                           float repeat_penalty);
-
-void rwkv_init_logits(struct rwkv_context * model);
-int32_t rwkv_sample(int n_logits, float * logits, int top_k, float top_p, float temp);
-int32_t rwkv_sample_repeat(int n_logits, float * logits,
-                               const int32_t * last_n_tokens_data,
-                               size_t last_n_tokens_data_size,
-                               int top_k, float top_p, float temp,
-                               int repeat_last_n,
-                           float repeat_penalty);
+//void rwkv_init_logits(struct rwkv_context * model);
+//int32_t rwkv_sample(int n_logits, float * logits, int top_k, float top_p, float temp);
+//int32_t rwkv_sample_repeat(int n_logits, float * logits,
+//                               const int32_t * last_n_tokens_data,
+//                               size_t last_n_tokens_data_size,
+//                               int top_k, float top_p, float temp,
+//                               int repeat_last_n,
+//                           float repeat_penalty);
 
 const char * llama_token_to_str(const struct llama_context * ctx, llama_token token);
 
@@ -152,10 +141,10 @@ struct llama_grammar* llama_load_grammar(const char* grammar_path);
 
 //struct llama_dadbed9_token_data_array;
 
-void llama_sample_grammar_for_dadbed9(struct llama_context * ctx, llama_dadbed9_token_data_array * candidates, const struct llama_grammar * grammar );
-llama_token llama_sample_token_for_dadbed9(struct llama_context * ctx, llama_dadbed9_token_data_array * candidates );
-llama_token llama_sample_token_mirostat_for_dadbed9(struct llama_context * ctx, llama_dadbed9_token_data_array * candidates,float tau,float   eta,int   m,float * mu,int vocabSize );
-llama_token llama_sample_token_mirostat_v2_for_dadbed9(struct llama_context * ctx, llama_dadbed9_token_data_array * candidates,float tau,float   eta, float * mu ) ;
+//void llama_sample_grammar_for_dadbed9(struct llama_context * ctx, llama_dadbed9_token_data_array * candidates, const struct llama_grammar * grammar );
+//llama_token llama_sample_token_for_dadbed9(struct llama_context * ctx, llama_dadbed9_token_data_array * candidates );
+//llama_token llama_sample_token_mirostat_for_dadbed9(struct llama_context * ctx, llama_dadbed9_token_data_array * candidates,float tau,float   eta,int   m,float * mu,int vocabSize );
+//llama_token llama_sample_token_mirostat_v2_for_dadbed9(struct llama_context * ctx, llama_dadbed9_token_data_array * candidates,float tau,float   eta, float * mu ) ;
 
 #ifdef __cplusplus
 }

@@ -1,5 +1,5 @@
 #include "gpt_helpers.h"
-#include "ggml_dadbed9.h"
+#include "ggml.h"
 
 #include "common.h"
 #include "common-ggml.h"
