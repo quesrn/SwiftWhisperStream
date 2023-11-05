@@ -66,6 +66,7 @@ let package = Package(
                 .unsafeFlags(["-DNDEBUG"]),
                 .unsafeFlags(["-pthread"]),
                 .unsafeFlags(["-fno-objc-arc"]),
-            ]),
+            ],
+            swiftSettings: [.interoperabilityMode(.C)]),
     ],
     cxxLanguageStandard: CXXLanguageStandard.cxx20)
