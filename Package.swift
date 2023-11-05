@@ -50,7 +50,7 @@ let package = Package(
 //                .copy("Resources/metal")
 //            ],
             publicHeadersPath: "include",
-            cSettings: [
+            cxxSettings: [
                 .unsafeFlags(["-Ofast"]), //comment this if you need to Debug llama_cpp
 //                .unsafeFlags(["-O3"]),
                 .unsafeFlags(["-mfma","-mfma","-mavx","-mavx2","-mf16c","-msse3","-mssse3"]), //for Intel CPU
@@ -69,4 +69,4 @@ let package = Package(
             ],
             swiftSettings: [.interoperabilityMode(.Cxx)]),
     ],
-    cxxLanguageStandard: CXXLanguageStandard.cxx20)
+    cxxLanguageStandard: CXXLanguageStandard.cxx2b)
