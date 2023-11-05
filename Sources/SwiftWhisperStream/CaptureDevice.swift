@@ -1,4 +1,4 @@
-import LibWhisper
+import whisper_cpp
 import SDL
 import libfvad
 

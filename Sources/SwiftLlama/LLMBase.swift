@@ -7,6 +7,7 @@
 
 import Foundation
 import whisper_cpp
+import llama
 
 public enum ModelLoadError: Error {
     // Throw when an invalid password is entered
@@ -48,7 +49,7 @@ public class LLMBase {
     public var sampleParams: ModelSampleParams = .default
     public var promptFormat: ModelPromptStyle = .None
     public var custom_prompt_format = ""
-    public var core_resourses = get_core_bundle_path()
+//    public var core_resourses = get_core_bundle_path()
     public var reverse_prompt: [String] = []
     public var session_tokens: [Int32] = []
 
@@ -202,12 +203,17 @@ public class LLMBase {
         let nl_logit = logits[nl_token]
         let last_n_repeat = min(min(Int32(last_n_tokens.count), repeat_last_n), n_ctx)
         
-        llama_sample_repetition_penalty(ctx, &candidates_p,
-                    last_n_tokens.mutPtr.advanced(by: last_n_tokens.count - Int(repeat_last_n)),
-                    Int(repeat_last_n), repeat_penalty)
-        llama_sample_frequency_and_presence_penalties(ctx, &candidates_p,
-                    last_n_tokens.mutPtr.advanced(by: last_n_tokens.count - Int(repeat_last_n)),
-                    Int(last_n_repeat), alpha_frequency, alpha_presence)
+//        llama_sample_repetition_penalty(ctx, &candidates_p,
+//                    last_n_tokens.mutPtr.advanced(by: last_n_tokens.count - Int(repeat_last_n)),
+//                    Int(repeat_last_n), repeat_penalty)
+        llama_sample_repetition_penalties(
+            ctx,
+            &candidates_p,
+            last_n_tokens.mutPtr.advanced(by: last_n_tokens.count - Int(repeat_last_n)),
+            Int(last_n_repeat),
+            repeat_penalty,
+            alpha_frequency,
+            alpha_presence)
         if(!penalize_nl) {
             logits[nl_token] = nl_logit
         }
@@ -242,7 +248,7 @@ public class LLMBase {
                 var mirostat_mu: Float = 2.0 * mirostat_tau
                 let mirostat_m = 100
                 llama_sample_temperature(ctx, &candidates_p, temp)
-                res_token =  llama_sample_token_mirostat(ctx, &candidates_p, mirostat_tau, mirostat_eta, Int32(mirostat_m), &mirostat_mu, vocabSize);
+                res_token =  llama_sample_token_mirostat(ctx, &candidates_p, mirostat_tau, mirostat_eta, Int32(mirostat_m), &mirostat_mu); // vocabSize);
             } else if(mirostat == 2) {
                 var mirostat_mu: Float = 2.0 * mirostat_tau
                 llama_sample_temperature(ctx, &candidates_p, temp)
@@ -304,12 +310,20 @@ public class LLMBase {
         let nl_logit = logits[nl_token]
         let last_n_repeat = min(min(Int32(last_n_tokens.count), repeat_last_n), n_ctx)
         
-        llama_sample_repetition_penalty(ctx, &candidates_p,
-                    last_n_tokens.mutPtr.advanced(by: last_n_tokens.count - Int(repeat_last_n)),
-                    Int(repeat_last_n), repeat_penalty)
-        llama_sample_frequency_and_presence_penalties(ctx, &candidates_p,
-                    last_n_tokens.mutPtr.advanced(by: last_n_tokens.count - Int(repeat_last_n)),
-                    Int(last_n_repeat), alpha_frequency, alpha_presence)
+        llama_sample_repetition_penalties(
+            ctx,
+            &candidates_p,
+            last_n_tokens.mutPtr.advanced(by: last_n_tokens.count - Int(repeat_last_n)),
+            Int(last_n_repeat),
+            repeat_penalty,
+            alpha_frequency,
+            alpha_presence)
+//        llama_sample_repetition_penalty(ctx, &candidates_p,
+//                    last_n_tokens.mutPtr.advanced(by: last_n_tokens.count - Int(repeat_last_n)),
+//                    Int(repeat_last_n), repeat_penalty)
+//        llama_sample_frequency_and_presence_penalties(ctx, &candidates_p,
+//                    last_n_tokens.mutPtr.advanced(by: last_n_tokens.count - Int(repeat_last_n)),
+//                    Int(last_n_repeat), alpha_frequency, alpha_presence)
         if(!penalize_nl) {
             logits[nl_token] = nl_logit
         }
@@ -343,7 +357,7 @@ public class LLMBase {
                 var mirostat_mu: Float = 2.0 * mirostat_tau
                 let mirostat_m = 100
                 llama_sample_temperature(ctx, &candidates_p, temp)
-                return llama_sample_token_mirostat(ctx, &candidates_p, mirostat_tau, mirostat_eta, Int32(mirostat_m), &mirostat_mu, vocabSize);
+                return llama_sample_token_mirostat(ctx, &candidates_p, mirostat_tau, mirostat_eta, Int32(mirostat_m), &mirostat_mu); //, vocabSize);
             } else if(mirostat == 2) {
                 var mirostat_mu: Float = 2.0 * mirostat_tau
                 llama_sample_temperature(ctx, &candidates_p, temp)

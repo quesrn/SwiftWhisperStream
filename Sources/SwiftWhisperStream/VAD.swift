@@ -1,7 +1,7 @@
 import Foundation
 import libfvad
 import SDL2
-import LibWhisper
+import whisper_cpp
 
 public class VAD: ObservableObject {
     @Published public var isSpeechDetected = false

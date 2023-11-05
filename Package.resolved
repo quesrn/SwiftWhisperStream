@@ -10,6 +10,15 @@
       }
     },
     {
+      "identity" : "llama.cpp",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ggerganov/llama.cpp.git",
+      "state" : {
+        "branch" : "b1483",
+        "revision" : "d9b33fe95bd257b36c84ee5769cc048230067d6f"
+      }
+    },
+    {
       "identity" : "swiftsdl2",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/lake-of-fire/SwiftSDL2.git",

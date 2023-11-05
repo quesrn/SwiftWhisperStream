@@ -10,15 +10,24 @@
 
 #define COMMON_SAMPLE_RATE 16000
 
+#define die(msg)          do { fputs("error: " msg "\n", stderr);                exit(1); } while (0)
+#define die_fmt(fmt, ...) do { fprintf(stderr, "error: " fmt "\n", __VA_ARGS__); exit(1); } while (0)
+
+#define print_build_info() do {                                                             \
+    fprintf(stderr, "%s: build = %d (%s)\n", __func__, BUILD_NUMBER, BUILD_COMMIT);         \
+    fprintf(stderr, "%s: built with %s for %s\n", __func__, BUILD_COMPILER, BUILD_TARGET);  \
+} while(0)
+
 //
 // GPT CLI argument parsing
 //
 
 struct gpt_params {
-    int32_t seed      = -1;  // RNG seed
-    int32_t n_threads = std::min(4, (int32_t) std::thread::hardware_concurrency());
-    int32_t n_predict = 200; // new tokens to predict
-    int32_t n_batch   = 8;   // batch size for prompt processing
+    int32_t seed       = -1;  // RNG seed
+    int32_t n_threads  = std::min(4, (int32_t) std::thread::hardware_concurrency());
+    int32_t n_predict  = 200; // new tokens to predict
+    int32_t n_parallel = 1;   // number of parallel streams
+    int32_t n_batch    = 8;   // batch size for prompt processing
 
     // sampling parameters
     int32_t top_k          = 40;
@@ -174,3 +183,5 @@ struct sam_params {
 bool sam_params_parse(int argc, char ** argv, sam_params & params);
 
 void sam_print_usage(int argc, char ** argv, const sam_params & params);
+
+void process_escapes(std::string& input);
