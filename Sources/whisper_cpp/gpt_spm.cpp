@@ -1,25 +1,24 @@
-//#include "./include/gpt_spm.h"
-//#include "gpt_helpers.h"
-////#include "./spm-headers/llama_dadbed9.h"
-////#include "./spm-headers/llama.h"
-//#include "common.h"
-//#include "common-ggml.h"
-////#include "./include/rwkv.h"
+#include "./include/gpt_spm.h"
+#include "gpt_helpers.h"
+//#include "./spm-headers/llama_dadbed9.h"
+//#include "./spm-headers/llama.h"
+#include "common.h"
+#include "common-ggml.h"
+//#include "./include/rwkv.h"
 //#include "grammar-parser.h"
-////#include "ggml_dadbed9.h"
-//#include "ggml.h"
-//#include <cassert>
-//#include <cmath>
-//#include <cstdio>
-//#include <cstring>
-//#include <cinttypes>
-//#include <fstream>
-//#include <map>
-//#include <string>
-//#include <vector>
-//#include <random>
-//
-//
+//#include "ggml_dadbed9.h"
+#include "ggml.h"
+#include <cassert>
+#include <cmath>
+#include <cstdio>
+#include <cstring>
+#include <cinttypes>
+#include <fstream>
+#include <map>
+#include <string>
+#include <vector>
+#include <random>
+
 //
 //
 //gpt_token gpt_base_token_bos(){
@@ -201,74 +200,74 @@
 ////                                                       rng);
 ////    return  smpl;
 ////}
-//
-//bool llama_save_state(struct llama_context * ctx, const char * fname){
-//    const size_t state_size = llama_get_state_size(ctx);
-//    uint8_t * state_mem = new uint8_t[state_size];
-//    FILE *fp_write = fopen(fname, "wb");
-//    llama_copy_state_data(ctx, state_mem); // could also copy directly to memory mapped file
-//    fwrite(&state_size, 1, sizeof(state_size), fp_write);
-//    fwrite(state_mem, 1, state_size, fp_write);
-//    fclose(fp_write);
-//    delete[] state_mem;
-//    return  true;
-//}
-//
-//bool llama_load_state(struct llama_context * ctx, const char * fname){
-//    FILE *fp_read = fopen(fname, "rb");
-//    size_t state_size = 0;
-//    fread(&state_size, 1, sizeof(state_size), fp_read);
-//    uint8_t * state_mem = new uint8_t[state_size];
-//    const size_t ret = fread(state_mem, 1, state_size, fp_read);
-//    if (ret != state_size) {
-//        fprintf(stderr, "\n%s : failed to read state\n", __func__);
-//        GGML_ASSERT(false);
-//    }
-//    llama_set_state_data(ctx, state_mem);
-//    delete[] state_mem;
-//    return  true;
-//}
-//
-//char* llama_token_to_str_res = new char[3];
-//
-//const char * llama_token_to_str(const struct llama_context * ctx, llama_token token) {
-//    std::vector<char> result(8, 0);
-//    const int n_tokens = llama_token_to_piece(llama_get_model(ctx), token, result.data(), result.size());
-//    if (n_tokens < 0) {
-//        result.resize(-n_tokens);
-//        int check = llama_token_to_piece(llama_get_model(ctx), token, result.data(), result.size());
-//        GGML_ASSERT(check == -n_tokens);
-//    } else {
-//        result.resize(n_tokens);
-//    }
-////    auto res = std::string(result.data(), result.size());
-////    fprintf(stderr, "%s: %s\n", __func__,res.c_str());
-//    strcpy(llama_token_to_str_res, std::string(result.data(), result.size()).c_str());
-//    return  llama_token_to_str_res;
-////    return res.c_str();
-//}
-//
-//
-//struct llama_grammar* llama_load_grammar(const char* grammar_path){
-//    struct llama_grammar * grammar = NULL;
-//    grammar_parser::parse_state parsed_grammar;
-//    
-//    std::ifstream infile;
-//    infile.open(grammar_path, std::ios::binary);
-//    infile.seekg(0, std::ios::end);
-//    size_t file_size_in_byte = infile.tellg();
-//    std::vector<char> grammar_context; // used to store text data
-//    grammar_context.resize(file_size_in_byte);
-//    infile.seekg(0, std::ios::beg);
-//    infile.read(&grammar_context[0], file_size_in_byte);
-//    
-//    parsed_grammar = grammar_parser::parse(grammar_context.data());
-//    // will be empty (default) if there are parse errors
-//    if (parsed_grammar.rules.empty()) {
-//        return NULL;
-//    }
-//    grammar_parser::print_grammar(stderr, parsed_grammar);
-//    std::vector<const llama_grammar_element *> grammar_rules(parsed_grammar.c_rules());
-//    grammar = llama_grammar_init(grammar_rules.data(), grammar_rules.size(), parsed_grammar.symbol_ids.at("root"));
-//    return grammar;
-//}
+
+bool llama_save_state(struct llama_context * ctx, const char * fname){
+    const size_t state_size = llama_get_state_size(ctx);
+    uint8_t * state_mem = new uint8_t[state_size];
+    FILE *fp_write = fopen(fname, "wb");
+    llama_copy_state_data(ctx, state_mem); // could also copy directly to memory mapped file
+    fwrite(&state_size, 1, sizeof(state_size), fp_write);
+    fwrite(state_mem, 1, state_size, fp_write);
+    fclose(fp_write);
+    delete[] state_mem;
+    return  true;
+}
+
+bool llama_load_state(struct llama_context * ctx, const char * fname){
+    FILE *fp_read = fopen(fname, "rb");
+    size_t state_size = 0;
+    fread(&state_size, 1, sizeof(state_size), fp_read);
+    uint8_t * state_mem = new uint8_t[state_size];
+    const size_t ret = fread(state_mem, 1, state_size, fp_read);
+    if (ret != state_size) {
+        fprintf(stderr, "\n%s : failed to read state\n", __func__);
+        GGML_ASSERT(false);
+    }
+    llama_set_state_data(ctx, state_mem);
+    delete[] state_mem;
+    return  true;
+}
+
+char* llama_token_to_str_res = new char[3];
+
+const char * llama_token_to_str(const struct llama_context * ctx, llama_token token) {
+    std::vector<char> result(8, 0);
+    const int n_tokens = llama_token_to_piece(llama_get_model(ctx), token, result.data(), result.size());
+    if (n_tokens < 0) {
+        result.resize(-n_tokens);
+        int check = llama_token_to_piece(llama_get_model(ctx), token, result.data(), result.size());
+        GGML_ASSERT(check == -n_tokens);
+    } else {
+        result.resize(n_tokens);
+    }
+//    auto res = std::string(result.data(), result.size());
+//    fprintf(stderr, "%s: %s\n", __func__,res.c_str());
+    strcpy(llama_token_to_str_res, std::string(result.data(), result.size()).c_str());
+    return  llama_token_to_str_res;
+//    return res.c_str();
+}
+
+
+struct llama_grammar* llama_load_grammar(const char* grammar_path){
+    struct llama_grammar * grammar = NULL;
+    grammar_parser::parse_state parsed_grammar;
+    
+    std::ifstream infile;
+    infile.open(grammar_path, std::ios::binary);
+    infile.seekg(0, std::ios::end);
+    size_t file_size_in_byte = infile.tellg();
+    std::vector<char> grammar_context; // used to store text data
+    grammar_context.resize(file_size_in_byte);
+    infile.seekg(0, std::ios::beg);
+    infile.read(&grammar_context[0], file_size_in_byte);
+    
+    parsed_grammar = grammar_parser::parse(grammar_context.data());
+    // will be empty (default) if there are parse errors
+    if (parsed_grammar.rules.empty()) {
+        return NULL;
+    }
+    grammar_parser::print_grammar(stderr, parsed_grammar);
+    std::vector<const llama_grammar_element *> grammar_rules(parsed_grammar.c_rules());
+    grammar = llama_grammar_init(grammar_rules.data(), grammar_rules.size(), parsed_grammar.symbol_ids.at("root"));
+    return grammar;
+}

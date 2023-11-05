@@ -116,35 +116,35 @@
 //};
 //
 //
-struct gpt_base_context {
-    std::mt19937 rng;
-
-    int64_t t_load_us = 0;
-    int64_t t_start_us = 0;
-    bool has_evaluated_once = false;
-
-    int64_t t_sample_us = 0;
-    int64_t t_eval_us   = 0;
-    int64_t t_p_eval_us = 0;
-
-    int32_t n_sample = 0; // number of tokens sampled
-    int32_t n_eval   = 0; // number of eval calls
-    int32_t n_p_eval = 0; // number of tokens in eval calls for the prompt (with batch size > 1)
-
-    gpt_base_model model;
-    gpt_vocab vocab;
-    
-    size_t mem_per_token = 0;
-
-    // decode output (2-dimensional array: [n_tokens][n_vocab])
-    std::vector<float> logits;
-    bool logits_all = false;
-
-    // input embedding (1-dimensional array: [n_embd])
-    std::vector<float> embedding;
-
-    
-};
+//struct gpt_base_context {
+//    std::mt19937 rng;
+//
+//    int64_t t_load_us = 0;
+//    int64_t t_start_us = 0;
+//    bool has_evaluated_once = false;
+//
+//    int64_t t_sample_us = 0;
+//    int64_t t_eval_us   = 0;
+//    int64_t t_p_eval_us = 0;
+//
+//    int32_t n_sample = 0; // number of tokens sampled
+//    int32_t n_eval   = 0; // number of eval calls
+//    int32_t n_p_eval = 0; // number of tokens in eval calls for the prompt (with batch size > 1)
+//
+//    gpt_base_model model;
+//    gpt_vocab vocab;
+//    
+//    size_t mem_per_token = 0;
+//
+//    // decode output (2-dimensional array: [n_tokens][n_vocab])
+//    std::vector<float> logits;
+//    bool logits_all = false;
+//
+//    // input embedding (1-dimensional array: [n_embd])
+//    std::vector<float> embedding;
+//
+//    
+//};
 //
 //
 //
