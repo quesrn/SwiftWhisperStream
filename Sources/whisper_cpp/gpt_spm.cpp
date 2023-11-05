@@ -2,10 +2,11 @@
 #include "gpt_helpers.h"
 //#include "./spm-headers/llama_dadbed9.h"
 //#include "./spm-headers/llama.h"
+//#include "llama.h"
 #include "common.h"
 #include "common-ggml.h"
 //#include "./include/rwkv.h"
-//#include "grammar-parser.h"
+#include "grammar-parser.h"
 //#include "ggml_dadbed9.h"
 #include "ggml.h"
 #include <cassert>
@@ -246,7 +247,6 @@ const char * llama_token_to_str(const struct llama_context * ctx, llama_token to
     return  llama_token_to_str_res;
 //    return res.c_str();
 }
-
 
 struct llama_grammar* llama_load_grammar(const char* grammar_path){
     struct llama_grammar * grammar = NULL;
