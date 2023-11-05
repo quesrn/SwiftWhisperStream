@@ -58,10 +58,7 @@ public class LLMBase {
     //var n_history: Int32 = 0
     var nPast: Int32 = 0
     
-    
-    
     public init(path: String, contextParams: ModelAndContextParams = .default) throws {
-        
         self.promptFormat = .None
         
         self.contextParams = contextParams
@@ -94,7 +91,7 @@ public class LLMBase {
             
 //            print("%s: seed = %d\n", params.seed);
             
-            if contextParams.grammar_path != nil && contextParams.grammar_path! != ""{
+            if contextParams.grammar_path != nil && contextParams.grammar_path! != "" {
                 try? self.load_grammar(contextParams.grammar_path!)
             }
             
@@ -132,7 +129,7 @@ public class LLMBase {
         }
     }
     
-    public  func llm_load_model(path: String = "", contextParams: ModelAndContextParams = .default) throws -> Bool{
+    public func llm_load_model(path: String = "", contextParams: ModelAndContextParams = .default) throws -> Bool {
         return false
     }
     
@@ -433,8 +430,6 @@ public class LLMBase {
 //        }
 //        return nil
     }
-    
-    
     
     public func predict(_ input: String, _ callback: ((String, Double) -> Bool) ) throws -> String {
         let params = sampleParams
