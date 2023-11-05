@@ -42,7 +42,6 @@ public enum ModelLoadError: Error {
 
 
 public class LLMBase {
-    
     public var context: OpaquePointer?
     public var grammar: OpaquePointer?
     public var contextParams: ModelAndContextParams
@@ -61,39 +60,39 @@ public class LLMBase {
     
     
     
-    public  init(path: String, contextParams: ModelAndContextParams = .default) throws {        
+    public init(path: String, contextParams: ModelAndContextParams = .default) throws {
         
         self.promptFormat = .None
         
         self.contextParams = contextParams
         //        var params = gptneox_context_default_params()
-        var params = gpt_context_default_params()
-        params.n_ctx = contextParams.context
-        params.n_parts = contextParams.parts
-        params.seed = 0
-        params.f16_kv = contextParams.f16Kv
-        params.logits_all = contextParams.logitsAll
-        params.vocab_only = contextParams.vocabOnly
-        params.use_mlock = contextParams.useMlock
-        params.embedding = contextParams.embedding
-        // Check if model file exists
-        if !FileManager.default.fileExists(atPath: path) {
-            throw ModelError.modelNotFound(path)
-        }
+//        var params = gpt_context_default_params()
+//        params.n_ctx = contextParams.context
+//        params.n_parts = contextParams.parts
+//        params.seed = 0
+//        params.f16_kv = contextParams.f16Kv
+//        params.logits_all = contextParams.logitsAll
+//        params.vocab_only = contextParams.vocabOnly
+//        params.use_mlock = contextParams.useMlock
+//        params.embedding = contextParams.embedding
+//        // Check if model file exists
+//        if !FileManager.default.fileExists(atPath: path) {
+//            throw ModelError.modelNotFound(path)
+//        }
         // Load model at path
         //        self.context = gptneox_init_from_file(path, params)
         //        let test = test_fn()
         var load_res:Bool? = false
         do{
             try ExceptionCather.catchException {
-                load_res = try? self.llm_load_model(path:path,contextParams:contextParams,params: params)
+                load_res = try? llm_load_model(path: path, contextParams: contextParams)
             }
         
             if load_res != true{
                 throw ModelLoadError.modelLoadError
             }
             
-            print("%s: seed = %d\n", params.seed);
+//            print("%s: seed = %d\n", params.seed);
             
             if contextParams.grammar_path != nil && contextParams.grammar_path! != ""{
                 try? self.load_grammar(contextParams.grammar_path!)
@@ -133,7 +132,7 @@ public class LLMBase {
         }
     }
     
-    public  func llm_load_model(path: String = "", contextParams: ModelAndContextParams = .default, params:gpt_context_params ) throws -> Bool{
+    public  func llm_load_model(path: String = "", contextParams: ModelAndContextParams = .default) throws -> Bool{
         return false
     }
     
@@ -143,23 +142,28 @@ public class LLMBase {
     }
     
     public func llm_token_bos() -> ModelToken{
-        return gpt_base_token_bos()
+        fatalError("No gpt2")
+//        return gpt_base_token_bos()
     }
     
     public func llm_token_eos() -> ModelToken{
-        return gpt_base_token_eos()
+        fatalError("No gpt2")
+//        return gpt_base_token_eos()
     }
     
     func llm_n_vocab(_ ctx: OpaquePointer!) -> Int32{
-        return gpt_base_n_vocab(ctx)
+        fatalError("No gpt2")
+//        return gpt_base_n_vocab(ctx)
     }
     
     func llm_get_logits(_ ctx: OpaquePointer!) -> UnsafeMutablePointer<Float>?{
-        return gpt_base_get_logits(ctx);
+        fatalError("No gpt2")
+//        return gpt_base_get_logits(ctx);
     }
     
     func llm_get_n_ctx(ctx: OpaquePointer!) -> Int32{
-        return gpt_base_n_ctx(ctx)
+        fatalError("No gpt2")
+//        return gpt_base_n_ctx(ctx)
     }
     
     
@@ -423,10 +427,11 @@ public class LLMBase {
 //    }
     
     public func llm_token_to_str(outputToken:Int32) -> String? {
-        if let cStr = gpt_base_token_to_str(context, outputToken){
-            return String(cString: cStr)
-        }
-        return nil
+        fatalError("no gpt2")
+//        if let cStr = gpt_base_token_to_str(context, outputToken){
+//            return String(cString: cStr)
+//        }
+//        return nil
     }
     
     
@@ -594,24 +599,25 @@ public class LLMBase {
 //    }
     
     public func llm_tokenize(_ input: String, bos: Bool = true, eos: Bool = false) -> [ModelToken] {
-        if input.count == 0 {
-            return []
-        }
-        
-        var embeddings = Array<ModelToken>(repeating: gpt_token(), count: input.utf8.count)
-        let n = gpt_base_tokenize(context, input, &embeddings, Int32(input.utf8.count), bos)
-        if n<=0{
-            return []
-        }
-        if Int(n) <= embeddings.count {
-            embeddings.removeSubrange(Int(n)..<embeddings.count)
-        }
-        
-        if eos {
-            embeddings.append(gpt_base_token_eos())
-        }
-        
-        return embeddings
+        fatalError("no gpt2")
+//        if input.count == 0 {
+//            return []
+//        }
+//        
+//        var embeddings = Array<ModelToken>(repeating: gpt_token(), count: input.utf8.count)
+//        let n = gpt_base_tokenize(context, input, &embeddings, Int32(input.utf8.count), bos)
+//        if n<=0{
+//            return []
+//        }
+//        if Int(n) <= embeddings.count {
+//            embeddings.removeSubrange(Int(n)..<embeddings.count)
+//        }
+//        
+//        if eos {
+//            embeddings.append(gpt_base_token_eos())
+//        }
+//        
+//        return embeddings
     }
     
     public func tokenizePrompt(_ input: String, _ style: ModelPromptStyle) -> [ModelToken] {

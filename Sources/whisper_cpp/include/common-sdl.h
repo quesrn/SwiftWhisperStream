@@ -3,10 +3,10 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_audio.h>
 
-//#include <atomic>
-#include <stdatomic.h>
-//#include <cstdint>
-#include <stdint.h>
+#include <atomic>
+//#include <stdatomic.h>
+#include <cstdint>
+//#include <stdint.h>
 #include <vector>
 #include <mutex>
 

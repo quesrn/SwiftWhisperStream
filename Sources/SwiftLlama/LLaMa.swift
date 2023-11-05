@@ -13,7 +13,7 @@ public class LLaMa: LLMBase {
     public var model: OpaquePointer?
     public var hardware_arch: String=""
     
-    public override func llm_load_model(path: String = "", contextParams: ModelAndContextParams = .default, params:gpt_context_params ) throws -> Bool{
+    public override func llm_load_model(path: String = "", contextParams: ModelAndContextParams = .default) throws -> Bool{
         var context_params = llama_context_default_params()
         var model_params = llama_model_default_params()
         context_params.n_ctx = UInt32(contextParams.context)
