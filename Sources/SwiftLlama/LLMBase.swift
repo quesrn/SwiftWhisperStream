@@ -48,8 +48,8 @@ public class LLMBase {
     public var promptFormat: ModelPromptStyle = .None
     public var custom_prompt_format = ""
 //    public var core_resourses = get_core_bundle_path()
-    public var reverse_prompt: [String] = []
-    public var session_tokens: [Int32] = []
+//    public var reverse_prompt: [String] = []
+//    public var session_tokens: [Int32] = []
 
     
     // Used to keep old context until it needs to be rotated or purge out for new tokens
@@ -430,6 +430,36 @@ public class LLMBase {
 //        return nil
     }
     
+    public func preparePast(messages: [(String, String)]) throws {
+        past.removeAll(keepingCapacity: true)
+        nPast = 0
+        
+        let params = sampleParams
+        let contextLength = Int32(contextParams.context)
+        
+        for message in messages {
+            let (input, output) = message
+            //        print("Past token count: \(nPast)/\(contextLength) (\(past.count))")
+            // Tokenize with prompt format
+            var inputTokens = tokenizePrompt(input, output: output, promptFormat)
+            if inputTokens.count == 0{
+                return
+            }
+            //            self.session_tokens.append(contentsOf: inputTokens)
+            let inputTokensCount = inputTokens.count
+            //        print("Input tokens: \(inputTokens)")
+            // Add new input tokens to past array
+            // Create space in context if needed
+            if inputTokensCount > contextLength {
+                throw ModelError.inputTooLong
+            }
+            // Output
+            var outputTokens = tokenizePrompt(input, output: output, promptFormat)
+            // Update past with most recent response
+            past.append(outputTokens)
+        }
+    }
+
     public func predict(_ input: String, _ callback: ((String, Double) -> Bool) ) throws -> String {
         let params = sampleParams
         let contextLength = Int32(contextParams.context)
@@ -439,7 +469,7 @@ public class LLMBase {
         if inputTokens.count == 0{
             return "Empty input."
         }
-        self.session_tokens.append(contentsOf: inputTokens)
+//        self.session_tokens.append(contentsOf: inputTokens)
         let inputTokensCount = inputTokens.count
         print("Input tokens: \(inputTokens)")
         // Add new input tokens to past array
@@ -524,7 +554,7 @@ public class LLMBase {
                     skipCallback = true
                 }
                 // Convert token to string and callback
-                self.session_tokens.append(outputToken)
+//                self.session_tokens.append(outputToken)
                 if !skipCallback, let str = llm_token_to_str(outputToken: outputToken){
                     output.append(str)
                     // Per token callback
@@ -614,12 +644,18 @@ public class LLMBase {
 //        return embeddings
     }
     
-    public func tokenizePrompt(_ input: String, _ style: ModelPromptStyle) -> [ModelToken] {
+    public func tokenizePrompt(_ input: String, output: String? = nil, _ style: ModelPromptStyle) -> [ModelToken] {
         switch style {
         case .None:
+            if let output = output {
+                return llm_tokenize(input + "\n" + output)
+            }
             return llm_tokenize(input)
         case .Custom:
             var formated_input = self.custom_prompt_format.replacingOccurrences(of: "{{prompt}}", with: input)
+            if let output = output {
+                formated_input += "\n" + output
+            }
             formated_input = formated_input.replacingOccurrences(of: "\\n", with: "\n")
             var bos = true
             if formated_input.contains("<s>"){
@@ -627,26 +663,44 @@ public class LLMBase {
             }
             return llm_tokenize(formated_input, bos: bos)
         case .ChatBase:
+            if let output = output {
+                return llm_tokenize("<human>: " + input + "\n<bot>:" + output)
+            }
             return llm_tokenize("<human>: " + input + "\n<bot>:")
         case .OpenAssistant:
-            let inputTokens = llm_tokenize("<|prompter|>" + input + "<|endoftext|>" + "<|assistant|>")
-            return inputTokens
+            if let output = output {
+                return llm_tokenize("<|prompter|>" + input + "<|endoftext|>" + "<|assistant|>" + output + "<|endoftext|>")
+            }
+            return llm_tokenize("<|prompter|>" + input + "<|endoftext|>" + "<|assistant|>")
         case .RedPajama_chat:
+            if let output = output {
+                return llm_tokenize("<human>:\n" + input + "\n<bot>:" + output)
+            }
             return llm_tokenize("<human>:\n" + input + "\n<bot>:")
         case .Dolly_b3:
-            let  INSTRUCTION_KEY = "### Instruction:";
-            let  RESPONSE_KEY    = "### Response:";
-            let  INTRO_BLURB     = "Below is an instruction that describes a task. Write a response that appropriately completes the request.";
-            let inputTokens = llm_tokenize(INTRO_BLURB + INSTRUCTION_KEY + input + RESPONSE_KEY)
-            return inputTokens
+            let  INSTRUCTION_KEY = "### Instruction:"
+            let  RESPONSE_KEY    = "### Response:"
+            let  INTRO_BLURB     = "Below is an instruction that describes a task. Write a response that appropriately completes the request."
+            if let output = output {
+                return llm_tokenize(INTRO_BLURB + INSTRUCTION_KEY + input + RESPONSE_KEY + output)
+            }
+            return llm_tokenize(INTRO_BLURB + INSTRUCTION_KEY + input + RESPONSE_KEY)
         case .StableLM_Tuned:
-            let inputTokens = llm_tokenize("<|USER|>" + input + "<|ASSISTANT|>")
-            return inputTokens
+            if let output = output {
+                return llm_tokenize("<|USER|>" + input + "<|ASSISTANT|>" + output)
+            }
+            return llm_tokenize("<|USER|>" + input + "<|ASSISTANT|>")
         case .LLaMa:
-            let input = " " + input
+            var input = " " + input
+            if let output = output {
+                input += "\n" + output
+            }
             return llm_tokenize(input, bos: true)
         case .LLaMa_QA:
-            let input = "Question: " + input + "\n\nAnswer: "
+            var input = "Question: " + input + "\n\nAnswer: "
+            if let output = output {
+                input += output
+            }
             return llm_tokenize(input, bos: true)
         }
     }

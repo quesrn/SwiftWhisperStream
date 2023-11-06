@@ -64,10 +64,14 @@ public class AI {
         }
     }
     
-    public func conversation(_ input: String,  _ tokenCallback: ((String, Double)  -> ())?, _ completion: ((String) -> ())?) {
+    public func conversationHistory(allMessages messages: [(String, String)]) throws {
+        try model.preparePast(messages: messages)
+    }
+    
+    public func conversation(_ input: String, _ tokenCallback: ((String, Double)  -> ())?, _ completion: ((String) -> ())?) {
         flagResponding = true
-        aiQueue.async {
-            guard let completion = completion else { return }
+        aiQueue.async { [weak self] in
+            guard let self = self, let completion = completion else { return }
             
             if self.model == nil{
                 DispatchQueue.main.async {
@@ -80,8 +84,9 @@ public class AI {
             // Model output
             var output: String? = ""
             do {
-                try ExceptionCatcher.catchException {
-                    output = try? self.model.predict(input, { str, time in
+                try ExceptionCatcher.catchException { [weak self] in
+                    guard let self = self else { return }
+                    output = try? model.predict(input, { str, time in
                         if self.flagExit {
                             // Reset flag
                             self.flagExit = false
