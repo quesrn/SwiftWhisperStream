@@ -9,7 +9,6 @@ import Foundation
 import whisper_cpp
 
 public class LLaMa: LLMBase {
-    
     public var model: OpaquePointer?
     public var hardware_arch: String=""
     
@@ -21,7 +20,7 @@ public class LLaMa: LLMBase {
         context_params.f16_kv = contextParams.f16Kv
         context_params.n_threads = UInt32(contextParams.n_threads)
         context_params.logits_all = contextParams.logitsAll
-//        context_params.n_batch = contextParams.
+        context_params.n_batch = UInt32(contextParams.n_batch)
         model_params.vocab_only = contextParams.vocabOnly
         model_params.use_mlock = contextParams.useMlock
         model_params.use_mmap = contextParams.useMMap

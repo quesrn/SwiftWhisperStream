@@ -69,7 +69,6 @@ public class AI {
         aiQueue.async {
             guard let completion = completion else { return }
             
-            
             if self.model == nil{
                 DispatchQueue.main.async {
                     self.flagResponding = false
@@ -79,9 +78,9 @@ public class AI {
             }
             
             // Model output
-            var output:String? = ""
-            do{
-                try ExceptionCather.catchException {
+            var output: String? = ""
+            do {
+                try ExceptionCatcher.catchException {
                     output = try? self.model.predict(input, { str, time in
                         if self.flagExit {
                             // Reset flag
@@ -95,7 +94,7 @@ public class AI {
                         return false
                     })
                 }
-            }catch{
+            } catch {
                 print(error)
                 DispatchQueue.main.async {
                     self.flagResponding = false
@@ -216,6 +215,7 @@ public struct ModelAndContextParams {
     public var parts: Int32 = -1   // -1 for default
     public var seed: UInt32 = 0xFFFFFFFF      // RNG seed, 0 for random
     public var n_threads: Int32 = 1
+    public var n_batch: Int32 = 512
     public var lora_adapters: [(String,Float)] = []
     
     public var f16Kv = true         // use fp16 for KV cache
@@ -232,13 +232,14 @@ public struct ModelAndContextParams {
     
     public static let `default` = ModelAndContextParams()
     
-    public init(context: Int32 = 2048 /*512*/, parts: Int32 = -1, seed: UInt32 = 0xFFFFFFFF, numberOfThreads: Int32 = 0, f16Kv: Bool = true, logitsAll: Bool = false, vocabOnly: Bool = false, useMlock: Bool = false,useMMap: Bool = true, embedding: Bool = false) {
+    public init(context: Int32 = 2048 /*512*/, parts: Int32 = -1, seed: UInt32 = 0xFFFFFFFF, numberOfThreads: Int32 = 0, n_batch: Int32 = 512, f16Kv: Bool = true, logitsAll: Bool = false, vocabOnly: Bool = false, useMlock: Bool = false, useMMap: Bool = true, embedding: Bool = false) {
         self.context = context
         self.parts = parts
         self.seed = seed
         // Set numberOfThreads to processorCount, processorCount is actually thread count of cpu
         self.n_threads = Int32(numberOfThreads) == Int32(0) ? processorsConunt : numberOfThreads
         //        self.numberOfThreads = processorsConunt
+        self.n_batch = n_batch
         self.f16Kv = f16Kv
         self.logitsAll = logitsAll
         self.vocabOnly = vocabOnly

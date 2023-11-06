@@ -40,7 +40,6 @@ public enum ModelLoadError: Error {
 //}
 
 
-
 public class LLMBase {
     public var context: OpaquePointer?
     public var grammar: OpaquePointer?
@@ -81,7 +80,7 @@ public class LLMBase {
         //        let test = test_fn()
         var load_res:Bool? = false
         do{
-            try ExceptionCather.catchException {
+            try ExceptionCatcher.catchException {
                 load_res = try? llm_load_model(path: path, contextParams: contextParams)
             }
         
@@ -96,7 +95,7 @@ public class LLMBase {
             }
             
             print(String(cString: print_system_info()))
-            try ExceptionCather.catchException {
+            try ExceptionCatcher.catchException {
                 _ = try? self.llm_init_logits()
             }
     //        if exception != nil{
@@ -119,7 +118,7 @@ public class LLMBase {
     
     public func load_grammar(_ path:String) throws -> Void{
         do{
-            try ExceptionCather.catchException {
+            try ExceptionCatcher.catchException {
                 self.grammar = llama_load_grammar(path)
             }
         }
@@ -395,7 +394,7 @@ public class LLMBase {
     func llm_init_logits() throws -> Bool {
         do{
             let inputs = [llm_token_bos(),llm_token_eos()]
-            try ExceptionCather.catchException {
+            try ExceptionCatcher.catchException {
                 _ = try? llm_eval(inputBatch: inputs)
             }
             return true
@@ -463,13 +462,13 @@ public class LLMBase {
                 inputTokens.removeFirst(evalCount)
                 if self.nPast + Int32(inputBatch.count) >= self.contextParams.context{
                     self.nPast = 0
-                    try ExceptionCather.catchException {
+                    try ExceptionCatcher.catchException {
                         _ = try? self.llm_eval(inputBatch: [self.llm_token_eos()])
                     }
 //                    throw ModelError.contextLimit
                 }
                 var eval_res:Bool? = nil
-                try ExceptionCather.catchException {
+                try ExceptionCatcher.catchException {
                     eval_res = try? self.llm_eval(inputBatch: inputBatch)
                 }
                 if eval_res == false{
@@ -486,7 +485,7 @@ public class LLMBase {
             while outputEnabled {
                 // Pull a generation from context
                 var outputToken:Int32 = -1
-                try ExceptionCather.catchException {
+                try ExceptionCatcher.catchException {
                     outputToken = self.llm_sample(
                         ctx: self.context,
                         last_n_tokens: &outputRepeatTokens,
@@ -547,13 +546,13 @@ public class LLMBase {
                     if self.nPast >= self.contextParams.context - 4{
                         self.nPast = self.nPast / 2
                         outputToken = self.llm_token_eos()
-                        try ExceptionCather.catchException {
+                        try ExceptionCatcher.catchException {
                             _ = try? self.llm_eval(inputBatch: [outputToken])
                         }
                         print("Context Limit!")
 //                        throw ModelError.contextLimit
                     }
-                    try ExceptionCather.catchException {
+                    try ExceptionCatcher.catchException {
                         eval_res = try? self.llm_eval(inputBatch: [outputToken])
                     }
                     if eval_res == false{

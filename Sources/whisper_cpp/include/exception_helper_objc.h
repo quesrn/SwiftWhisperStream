@@ -12,7 +12,7 @@
 
 #define noEscape __attribute__((noescape))
 
-@interface ExceptionCather : NSObject
+@interface ExceptionCatcher : NSObject
 + (BOOL)catchException:(noEscape void(^)(void))tryBlock error:(__autoreleasing NSError **)error;
 @end
 

@@ -10,7 +10,7 @@
 #import "exception_helper_objc.h"
 #include <exception>
 
-@implementation ExceptionCather
+@implementation ExceptionCatcher
 + (BOOL)catchException:(noEscape void(^)(void))tryBlock error:(__autoreleasing NSError **)error {
     try {
         tryBlock();
