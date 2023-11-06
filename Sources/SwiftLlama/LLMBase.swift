@@ -48,7 +48,7 @@ public class LLMBase {
     public var promptFormat: ModelPromptStyle = .None
     public var custom_prompt_format = ""
 //    public var core_resourses = get_core_bundle_path()
-//    public var reverse_prompt: [String] = []
+    public var reverse_prompt: [String] = []
 //    public var session_tokens: [Int32] = []
 
     
