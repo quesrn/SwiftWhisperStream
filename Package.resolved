@@ -14,8 +14,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/ggerganov/llama.cpp.git",
       "state" : {
-        "branch" : "b1483",
-        "revision" : "d9b33fe95bd257b36c84ee5769cc048230067d6f"
+        "branch" : "b1493",
+        "revision" : "381efbf480959bb6d1e247a8b0c2328f22e350f8"
       }
     },
     {

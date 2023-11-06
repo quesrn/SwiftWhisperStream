@@ -1,7 +1,7 @@
 #pragma once
 
-#include <SDL.h>
-#include <SDL_audio.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_audio.h>
 
 #include <atomic>
 #include <cstdint>
@@ -17,8 +17,8 @@ public:
     audio_async(int len_ms);
     ~audio_async();
 
-    bool init(int capture_id, int sample_rate);
-
+    bool init(int capture_id, int sample_rate, void *vad, SDL_AudioCallback rawCallback);
+    
     // start capturing audio via the provided SDL callback
     // keep last len_ms seconds of audio in a circular buffer
     bool resume();
@@ -33,7 +33,10 @@ public:
 
 private:
     SDL_AudioDeviceID m_dev_id_in = 0;
-
+    
+    void *vad;
+    SDL_AudioCallback rawCallback;
+    
     int m_len_ms = 0;
     int m_sample_rate = 0;
 
