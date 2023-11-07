@@ -7,6 +7,8 @@
 
 #include "ggml.h"
 
+GGML_API struct ggml_cgraph * ggml_new_graph_custom  (struct ggml_context * ctx, size_t size, bool grads);
+
 #ifdef __GNUC__
 #    define WHISPER_DEPRECATED(func, hint) func __attribute__((deprecated(hint)))
 #elif defined(_MSC_VER)
@@ -38,8 +40,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-GGML_API struct ggml_cgraph * ggml_new_graph_custom  (struct ggml_context * ctx, size_t size, bool grads);
 
     //
     // C interface
