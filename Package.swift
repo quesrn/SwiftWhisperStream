@@ -16,7 +16,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/lake-of-fire/SwiftSDL2.git", branch: "master"),
         .package(url: "https://github.com/TeHikuMedia/libfvad-ios.git", branch: "tumu"),
-        .package(url: "https://github.com/ggerganov/llama.cpp.git", branch: "b1493"),
+        .package(url: "https://github.com/lake-of-fire/llama.cpp.git", branch: "master"),
     ],
     targets: [
         .target(

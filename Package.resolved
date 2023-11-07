@@ -12,10 +12,10 @@
     {
       "identity" : "llama.cpp",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/ggerganov/llama.cpp.git",
+      "location" : "https://github.com/lake-of-fire/llama.cpp.git",
       "state" : {
-        "branch" : "b1493",
-        "revision" : "381efbf480959bb6d1e247a8b0c2328f22e350f8"
+        "branch" : "master",
+        "revision" : "8ced5d0297da5f8cf33fd44c053eca87605f5008"
       }
     },
     {
