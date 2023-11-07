@@ -40,7 +40,9 @@ let package = Package(
                 .product(name: "SDL", package: "SwiftSDL2"),
                 .product(name: "llama", package: "llama.cpp"),
             ],
-//            exclude: [
+            exclude: [
+                "ggml.h",
+            ],
 //                "Resources/metal/ggml-metal_dadbed9.metal",
 //                "Resources/metal/ggml-metal_from-llmfarm.metal",
 //            ],
