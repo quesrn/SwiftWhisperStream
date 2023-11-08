@@ -45,6 +45,7 @@ public class LLMBase {
     public var grammar: OpaquePointer?
     public var contextParams: ModelAndContextParams
     public var sampleParams: ModelSampleParams = .default
+    public var systemFormat: ModelPromptStyle = .None
     public var promptFormat: ModelPromptStyle = .None
     public var custom_prompt_format = ""
 //    public var core_resourses = get_core_bundle_path()
@@ -58,8 +59,6 @@ public class LLMBase {
     var nPast: Int32 = 0
     
     public init(path: String, contextParams: ModelAndContextParams = .default) throws {
-        self.promptFormat = .None
-        
         self.contextParams = contextParams
         //        var params = gptneox_context_default_params()
 //        var params = gpt_context_default_params()
@@ -430,10 +429,23 @@ public class LLMBase {
 //        return nil
     }
     
-    public func preparePast(messages: [(String, String)]) throws {
+    public func reinitializeSystemPrompt(_ prompt: String) throws {
         past.removeAll(keepingCapacity: true)
         nPast = 0
         
+        var inputTokens = tokenizePrompt(prompt, systemFormat)
+        if inputTokens.count == 0 {
+            return
+        }
+        let inputTokensCount = inputTokens.count
+        if inputTokensCount > Int32(contextParams.context) {
+            throw ModelError.inputTooLong
+        }
+        past.append(inputTokens)
+    }
+    
+    // FIXME: proper context size checking incl. past tokens...
+    public func preparePast(messages: [(String, String)]) throws {
         let params = sampleParams
         let contextLength = Int32(contextParams.context)
         
@@ -442,7 +454,7 @@ public class LLMBase {
             //        print("Past token count: \(nPast)/\(contextLength) (\(past.count))")
             // Tokenize with prompt format
             var inputTokens = tokenizePrompt(input, output: output, promptFormat)
-            if inputTokens.count == 0{
+            if inputTokens.count == 0 {
                 return
             }
             //            self.session_tokens.append(contentsOf: inputTokens)

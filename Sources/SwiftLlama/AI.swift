@@ -64,6 +64,10 @@ public class AI {
         }
     }
     
+    public func reinitializeSystemPrompt(_ prompt: String) throws {
+        try model.reinitializeSystemPrompt(prompt)
+    }
+    
     public func conversationHistory(allMessages messages: [(String, String)]) throws {
         try model.preparePast(messages: messages)
     }
