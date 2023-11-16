@@ -27,9 +27,9 @@ public class LLaMa: LLMBase {
 //        context_params.rope_freq_base = 10000.0
 //        context_params.rope_freq_scale = 1
         
-        if contextParams.use_metal{
+        if contextParams.useMetal{
             model_params.n_gpu_layers = 1
-        }else{
+        } else {
             model_params.n_gpu_layers = 0
         }
         self.hardware_arch = Get_Machine_Hardware_Name()// Disable Metal on intel Mac

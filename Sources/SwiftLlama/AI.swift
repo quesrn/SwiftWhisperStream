@@ -233,15 +233,15 @@ public struct ModelAndContextParams {
     public var useMlock = false     // force system to keep model in RAM
     public var useMMap = true     // if disabled dont use MMap file
     public var embedding = false    // embedding mode only
-    public var processorsConunt  = Int32(ProcessInfo.processInfo.processorCount)
-    public var use_metal = false
-    public var grammar_path:String? = nil
+    public var processorsConunt = Int32(ProcessInfo.processInfo.processorCount)
+    public var useMetal = false
+    public var grammarPath: String? = nil
     
     public var warm_prompt = "\n\n\n"
     
     public static let `default` = ModelAndContextParams()
     
-    public init(context: Int32 = 2048 /*512*/, parts: Int32 = -1, seed: UInt32 = 0xFFFFFFFF, numberOfThreads: Int32 = 0, n_batch: Int32 = 512, f16Kv: Bool = true, logitsAll: Bool = false, vocabOnly: Bool = false, useMlock: Bool = false, useMMap: Bool = true, embedding: Bool = false) {
+    public init(context: Int32 = 2048 /*512*/, parts: Int32 = -1, seed: UInt32 = 0xFFFFFFFF, numberOfThreads: Int32 = 0, n_batch: Int32 = 512, f16Kv: Bool = true, logitsAll: Bool = false, vocabOnly: Bool = false, useMlock: Bool = false, useMMap: Bool = true, useMetal: Bool = false, embedding: Bool = false) {
         self.context = context
         self.parts = parts
         self.seed = seed
@@ -254,6 +254,7 @@ public struct ModelAndContextParams {
         self.vocabOnly = vocabOnly
         self.useMlock = useMlock
         self.useMMap = useMMap
+        self.useMetal = useMetal
         self.embedding = embedding
     }
 }
@@ -304,8 +305,7 @@ public struct ModelSampleParams {
                 mirostat: Int32 = 0,
                 mirostat_tau: Float = 5.0,
                 mirostat_eta: Float = 0.1,
-                penalize_nl: Bool = true,
-                use_metal:Bool = false) {
+                penalize_nl: Bool = true) {
         self.n_batch = n_batch
         self.temp = temp
         self.top_k = top_k

@@ -89,8 +89,8 @@ public class LLMBase {
             
 //            print("%s: seed = %d\n", params.seed);
             
-            if contextParams.grammar_path != nil && contextParams.grammar_path! != "" {
-                try? self.load_grammar(contextParams.grammar_path!)
+            if contextParams.grammarPath != nil && contextParams.grammarPath! != "" {
+                try? self.load_grammar(contextParams.grammarPath!)
             }
             
             print(String(cString: print_system_info()))
@@ -392,7 +392,7 @@ public class LLMBase {
     
     func llm_init_logits() throws -> Bool {
         do{
-            let inputs = [llm_token_bos(),llm_token_eos()]
+            let inputs = [llm_token_bos(), llm_token_eos()]
             try ExceptionCatcher.catchException {
                 _ = try? llm_eval(inputBatch: inputs)
             }
