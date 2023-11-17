@@ -202,8 +202,11 @@ public class LLMBase {
         print("LLM sample 3")
         // Apply penalties
         let nl_token = Int(llm_token_nl())
+        print("LLM sample 3.1")
         let nl_logit = logits[nl_token]
+        print("LLM sample 3.2")
         let last_n_repeat = min(min(Int32(last_n_tokens.count), repeat_last_n), n_ctx)
+        print("LLM sample 3.3")
         
 //        llama_sample_repetition_penalty(ctx, &candidates_p,
 //                    last_n_tokens.mutPtr.advanced(by: last_n_tokens.count - Int(repeat_last_n)),
@@ -216,7 +219,9 @@ public class LLMBase {
             repeat_penalty,
             alpha_frequency,
             alpha_presence)
+        print("LLM sample 3.4")
         if(!penalize_nl) {
+        print("LLM sample 3.5")
             logits[nl_token] = nl_logit
         }
         
