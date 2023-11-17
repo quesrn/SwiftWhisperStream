@@ -475,7 +475,7 @@ public class LLMBase {
     public func predict(_ input: String, _ callback: ((String, Double) -> Bool) ) throws -> String {
         let params = sampleParams
         let contextLength = Int32(contextParams.context)
-        print("Past token count: \(nPast)/\(contextLength) (\(past.count))")
+//        print("Past token count: \(nPast)/\(contextLength) (\(past.count))")
         // Tokenize with prompt format
         var inputTokens = tokenizePrompt(input, promptFormat)
         if inputTokens.count == 0{
@@ -483,7 +483,7 @@ public class LLMBase {
         }
 //        self.session_tokens.append(contentsOf: inputTokens)
         let inputTokensCount = inputTokens.count
-        print("Input tokens: \(inputTokens)")
+//        print("Input tokens: \(inputTokens)")
         // Add new input tokens to past array
         past.append(inputTokens)
         // Create space in context if needed
@@ -556,13 +556,13 @@ public class LLMBase {
                 // Check for eos - end early - check eos before bos in case they are the same
                 if outputToken == llm_token_eos() {
                     outputEnabled = false
-                    print("[EOS]")
+//                    print("[EOS]")
                     break
                 }
                 // Check for bos, skip callback if so, bos = eos for most gptneox so this should typically never occur
                 var skipCallback = false
                 if outputToken == llm_token_bos()  {
-                    print("[BOS]")
+//                    print("[BOS]")
                     skipCallback = true
                 }
                 // Convert token to string and callback

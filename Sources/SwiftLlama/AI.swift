@@ -27,7 +27,7 @@ public actor AI {
     public var modelPath: String
     public var modelName: String
     
-//    public var flagExit = false
+    public var flagExit = false
     private(set) var flagResponding = false
     
     public var context: Int32 {
@@ -96,6 +96,10 @@ public actor AI {
             var output: String?
             try ExceptionCatcher.catchException {
                 output = try? model.predict(input) { str, time in
+                    if flagExit {
+                        flagExit = false
+                        return true
+                    }
                     tokenCallback(str, time)
                     return false
                 }

@@ -111,9 +111,6 @@ public class LLaMa: LLMBase {
         return llama_token_eos(self.model)
     }
     
-
-    
-    
     public override func llm_tokenize(_ input: String, bos: Bool = true, eos: Bool = false) -> [ModelToken] {
         if input.count == 0 {
             return []
