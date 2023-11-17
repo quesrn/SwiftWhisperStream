@@ -30,6 +30,14 @@ public actor AI {
 //    public var flagExit = false
     private(set) var flagResponding = false
     
+    public var context: Int32 {
+        return model.contextParams.context
+    }
+    
+    public var nBatch: Int32 {
+        return model.contextParams.n_batch
+    }
+    
     public init(_modelPath: String) {
         self.modelPath = _modelPath
         self.modelName = NSURL(fileURLWithPath: _modelPath).lastPathComponent!
