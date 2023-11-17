@@ -30,22 +30,23 @@ public actor AI {
     @MainActor public var flagExit = false
     private(set) var flagResponding = false
     
-    public var context: Int32 {
-        return model.contextParams.context
-    }
+    @MainActor public var context: Int32 = 0
     
-    public var nBatch: Int32 {
-        return model.contextParams.n_batch
-    }
+    @MainActor public var nBatch: Int32 = 0
     
     public init(_modelPath: String) {
         self.modelPath = _modelPath
         self.modelName = NSURL(fileURLWithPath: _modelPath).lastPathComponent!
     }
     
-    public func loadModel(_ aiModel: ModelInference, contextParams: ModelAndContextParams = .default) throws -> Bool {
+    public func loadModel(_ aiModel: ModelInference, contextParams: ModelAndContextParams = .default) async throws -> Bool {
 //        print("AI init")
-        do{
+        await Task { @MainActor in
+            context = contextParams.context
+            nBatch = contextParams.n_batch
+        }.value
+
+        do {
             switch aiModel {
 //            case .LLama_bin:
 //                model = try LLaMa_dadbed9(path: self.modelPath, contextParams: contextParams)
