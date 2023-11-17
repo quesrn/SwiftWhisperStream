@@ -19,15 +19,15 @@ public enum ModelInference {
 //    case RWKV
 }
 
-public class AI {
-    var aiQueue = DispatchQueue(label: "LLMFarm-Main", qos: .userInitiated, attributes: .concurrent, autoreleaseFrequency: .inherit, target: nil)
+public actor AI {
+//    var aiQueue = DispatchQueue(label: "LLMFarm-Main", qos: .userInitiated, attributes: .concurrent, autoreleaseFrequency: .inherit, target: nil)
     
     //var model: Model!
     public var model: LLMBase!
     public var modelPath: String
     public var modelName: String
     
-    public var flagExit = false
+//    public var flagExit = false
     private(set) var flagResponding = false
     
     public init(_modelPath: String) {
@@ -72,50 +72,34 @@ public class AI {
         try model.preparePast(messages: messages)
     }
     
-    public func conversation(_ input: String, _ tokenCallback: ((String, Double)  -> ())?, _ completion: ((String) -> ())?) {
+    public func conversation(_ input: String, _ tokenCallback: @escaping (String, Double) -> ()) -> String {
         flagResponding = true
-        aiQueue.async { [weak self] in
-            guard let self = self, let completion = completion else { return }
-            
-            if self.model == nil{
-                DispatchQueue.main.async {
-                    self.flagResponding = false
-                    completion("[Error] Load Model")
-                }
-                return
+        
+        defer {
+            flagResponding = false
+        }
+        
+        do {
+            guard let model = model else {
+                print("[Error] Load Model")
+                return "[Error] Load Model"
             }
             
-            // Model output
-            var output: String? = ""
-            do {
-                try ExceptionCatcher.catchException { [weak self] in
-                    guard let self = self else { return }
-                    output = try? model.predict(input, { str, time in
-                        if self.flagExit {
-                            // Reset flag
-                            self.flagExit = false
-                            // Alert model of exit flag
-                            return true
-                        }
-                        DispatchQueue.main.async {
-                            tokenCallback?(str, time)
-                        }
-                        return false
-                    })
-                }
-            } catch {
-                print(error)
-                DispatchQueue.main.async {
-                    self.flagResponding = false
-                    completion("[Error] \(error)")
+            var output: String?
+            try ExceptionCatcher.catchException {
+                output = try? model.predict(input) { str, time in
+                    tokenCallback(str, time)
+                    return false
                 }
             }
-            DispatchQueue.main.async {
-                self.flagResponding = false
-                completion(output ?? "[Error]")
-            }
+            
+            return output ?? "[Error]"
+        } catch {
+            print("[Error] \(error)")
+            return "[Error] \(error)"
         }
     }
+
 }
 
 private typealias _ModelProgressCallback = (_ progress: Float, _ userData: UnsafeMutableRawPointer?) -> Void
