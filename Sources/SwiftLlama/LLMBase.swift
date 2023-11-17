@@ -203,6 +203,9 @@ public class LLMBase {
         // Apply penalties
         let nl_token = Int(llm_token_nl())
         print("LLM sample 3.1")
+        print("LLM sample 3.1 - \(nl_token)")
+        print("LLM sample 3.1 - \(logits)")
+        print("LLM sample 3.1 - \(logits[nl_token])")
         let nl_logit = logits[nl_token]
         print("LLM sample 3.2")
         let last_n_repeat = min(min(Int32(last_n_tokens.count), repeat_last_n), n_ctx)
