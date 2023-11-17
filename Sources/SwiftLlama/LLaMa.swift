@@ -100,15 +100,15 @@ public class LLaMa: LLMBase {
     }
     
     public override func llm_token_nl() -> ModelToken{
-        return llama_token_nl(self.context)
+        return llama_token_nl(self.model)
     }
 
     public override func llm_token_bos() -> ModelToken{
-       return llama_token_bos(self.context)
+       return llama_token_bos(self.model)
     }
     
     public override func llm_token_eos() -> ModelToken{
-        return llama_token_eos(self.context)
+        return llama_token_eos(self.model)
     }
     
 
@@ -137,7 +137,7 @@ public class LLaMa: LLMBase {
         }
         
         if eos {
-            embeddings.append(llama_token_eos(self.context))
+            embeddings.append(llama_token_eos(self.model))
         }
         
         return embeddings
