@@ -27,7 +27,7 @@ public actor AI {
     public var modelPath: String
     public var modelName: String
     
-    public var flagExit = false
+    @MainActor public var flagExit = false
     private(set) var flagResponding = false
     
     public var context: Int32 {
