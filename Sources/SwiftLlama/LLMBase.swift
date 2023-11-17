@@ -177,12 +177,10 @@ public class LLMBase {
                 mirostat_tau: Float32,
                 mirostat_eta: Float32,
                 penalize_nl: Bool) -> ModelToken {
-        print("LLM sample 1")
         // Model input context size
         let n_ctx = llm_get_n_ctx(ctx: ctx)
         // Auto params
         
-        print("LLM sample 2")
         let top_k = top_k <= 0 ? llm_n_vocab(ctx) : top_k
         let repeat_last_n = repeat_last_n < 0 ? n_ctx : repeat_last_n
         
@@ -198,15 +196,12 @@ public class LLMBase {
         }
         var candidates_p = llama_token_data_array(data: candidates.mutPtr, size: candidates.count, sorted: false)
         
-        print("LLM sample 3")
         // Apply penalties
         let nl_token = Int(llm_token_nl())
 //        let nl_logit = logits[nl_token]
         let nl_index = max(0, min(Int(vocabSize) - 1, nl_token))
         let nl_logit = logits[nl_index]
-        print("LLM sample 3.2")
         let last_n_repeat = min(min(Int32(last_n_tokens.count), repeat_last_n), n_ctx)
-        print("LLM sample 3.3")
         
 //        llama_sample_repetition_penalty(ctx, &candidates_p,
 //                    last_n_tokens.mutPtr.advanced(by: last_n_tokens.count - Int(repeat_last_n)),
@@ -219,13 +214,10 @@ public class LLMBase {
             repeat_penalty,
             alpha_frequency,
             alpha_presence)
-        print("LLM sample 3.4")
         if(!penalize_nl) {
-        print("LLM sample 3.5")
             logits[nl_token] = nl_logit
         }
         
-        print("LLM sample 4")
 //        let swiftTokenCallback : (@convention(c) (Int32 ) -> String?) = {
 //            in_token -> String? in
 //            return self.llm_token_to_str(outputToken:in_token)
@@ -247,7 +239,6 @@ public class LLMBase {
         
         var res_token:Int32 = 0
         
-        print("LLM sample 5")
         if(temp <= 0) {
             // Greedy sampling
             res_token = llama_sample_token_greedy(ctx, &candidates_p)
@@ -273,11 +264,9 @@ public class LLMBase {
             }
         }
         
-        print("LLM sample 6")
         if (self.grammar != nil) {
             llama_grammar_accept_token(ctx, self.grammar, res_token);
         }
-        print("LLM sample 7 \(res_token.description)")
         return res_token
 
     }

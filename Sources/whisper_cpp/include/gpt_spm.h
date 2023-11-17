@@ -15,7 +15,7 @@ extern "C" {
 #endif
 
 //typedef int gpt_token;
-typedef int llama_token;
+//typedef int llama_token;
 
 
 
@@ -133,9 +133,6 @@ const char * print_system_info(void);
 //                           float repeat_penalty);
 
 const char * llama_token_to_str(const struct llama_context * ctx, llama_token token);
-
-bool llama_save_state(struct llama_context * ctx, const char * fname);
-bool llama_load_state(struct llama_context * ctx, const char * fname);
 
 struct llama_grammar* llama_load_grammar(const char* grammar_path);
 
