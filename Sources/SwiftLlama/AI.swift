@@ -27,7 +27,15 @@ public actor AI {
     public var modelPath: String
     public var modelName: String
     
-    public var flagExit = false
+    public var flagExit = false {
+        didSet {
+            let val = flagExit
+            Task { @MainActor in
+                didFlagExit = val
+            }
+        }
+    }
+    @MainActor public var didFlagExit = false
     private(set) var flagResponding = false
     
     @MainActor public var context: Int32 = 0
