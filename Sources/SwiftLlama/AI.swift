@@ -101,29 +101,23 @@ public actor AI {
             flagResponding = false
         }
         
-        do {
-            guard let model = model else {
-                print("[Error] Load Model")
-                return "[Error] Load Model"
-            }
-            
-            var output: String?
-//            try ExceptionCatcher.catchException {
-            output = try model.predict(input) { str, time in
-                if flagExit {
-                    flagExit = false
-                    return true
-                }
-                tokenCallback(str, time)
-                return false
-            }
-//            }
-            
-            return output ?? "[Error]"
-        } catch {
-            print("[Error] \(error)")
-            return "[Error] \(error)"
+        guard let model = model else {
+            throw ModelLoadError.modelLoadError
         }
+        
+        var output: String?
+//            try ExceptionCatcher.catchException {
+        output = try model.predict(input) { str, time in
+            if flagExit {
+                flagExit = false
+                return true
+            }
+            tokenCallback(str, time)
+            return false
+        }
+//            }
+        
+        return output ?? "[Error]"
     }
 
 }
