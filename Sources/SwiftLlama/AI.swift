@@ -27,7 +27,7 @@ public actor AI {
     public var modelPath: String
     public var modelName: String
     
-    @MainActor public var flagExit = false
+    public var flagExit = false
     private(set) var flagResponding = false
     
     @MainActor public var context: Int32 = 0
@@ -81,7 +81,7 @@ public actor AI {
         try model.preparePast(messages: messages)
     }
     
-    public func conversation(_ input: String, _ tokenCallback: @escaping (String, Double) -> ()) -> String {
+    public func conversation(_ input: String, _ tokenCallback: @escaping (String, Double) -> ()) throws -> String {
         flagResponding = true
         
         defer {
@@ -95,16 +95,16 @@ public actor AI {
             }
             
             var output: String?
-            try ExceptionCatcher.catchException {
-                output = try? model.predict(input) { str, time in
-                    if flagExit {
-                        flagExit = false
-                        return true
-                    }
-                    tokenCallback(str, time)
-                    return false
+//            try ExceptionCatcher.catchException {
+            output = try model.predict(input) { str, time in
+                if flagExit {
+                    flagExit = false
+                    return true
                 }
+                tokenCallback(str, time)
+                return false
             }
+//            }
             
             return output ?? "[Error]"
         } catch {
