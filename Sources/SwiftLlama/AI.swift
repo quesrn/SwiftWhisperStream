@@ -47,6 +47,10 @@ public actor AI {
         self.modelName = NSURL(fileURLWithPath: _modelPath).lastPathComponent!
     }
     
+    public func stop() async {
+        flagExit = true
+    }
+    
     public func loadModel(_ aiModel: ModelInference, contextParams: ModelAndContextParams = .default) async throws -> Bool {
 //        print("AI init")
         await Task { @MainActor in
@@ -91,6 +95,7 @@ public actor AI {
     
     public func conversation(_ input: String, _ tokenCallback: @escaping (String, Double) -> ()) throws -> String {
         flagResponding = true
+        flagExit = false
         
         defer {
             flagResponding = false
