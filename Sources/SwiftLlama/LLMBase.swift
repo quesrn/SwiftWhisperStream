@@ -477,15 +477,17 @@ public class LLMBase {
         let contextLength = Int32(contextParams.context)
 //        print("Past token count: \(nPast)/\(contextLength) (\(past.count))")
         // Tokenize with prompt format
-        var inputTokens = tokenizePrompt(input, promptFormat)
-        if inputTokens.count == 0{
-            return "Empty input."
+        var inputTokens = Array(past.joined())
+        let promptTokens = tokenizePrompt(input, promptFormat)
+        if promptTokens.count == 0 {
+            return ""
         }
+        inputTokens.append(contentsOf: promptTokens)
 //        self.session_tokens.append(contentsOf: inputTokens)
         let inputTokensCount = inputTokens.count
 //        print("Input tokens: \(inputTokens)")
         // Add new input tokens to past array
-        past.append(inputTokens)
+        past.append(promptTokens)
         // Create space in context if needed
         if inputTokensCount > contextLength {
             throw ModelError.inputTooLong
@@ -502,18 +504,18 @@ public class LLMBase {
                 inputBatch.append(contentsOf: inputTokens[0 ..< evalCount])
                 
                 inputTokens.removeFirst(evalCount)
-                if self.nPast + Int32(inputBatch.count) >= self.contextParams.context{
+                if nPast + Int32(inputBatch.count) >= contextParams.context {
                     self.nPast = 0
-                    try ExceptionCatcher.catchException {
-                        _ = try? self.llm_eval(inputBatch: [self.llm_token_eos()])
-                    }
-//                    throw ModelError.contextLimit
+//                    try ExceptionCatcher.catchException {
+//                        _ = try? self.llm_eval(inputBatch: [self.llm_token_eos()])
+//                    }
+                    throw ModelError.contextLimit
                 }
-                var eval_res:Bool? = nil
+                var eval_res: Bool? = nil
                 try ExceptionCatcher.catchException {
                     eval_res = try? self.llm_eval(inputBatch: inputBatch)
                 }
-                if eval_res == false{
+                if eval_res == false {
                     throw ModelError.failedToEval
                 }
                 nPast += Int32(evalCount)
@@ -584,15 +586,15 @@ public class LLMBase {
                 // Check if we need to run another response eval
                 if outputEnabled {
                     // Send generated token back into model for next generation
-                    var eval_res:Bool? = nil
-                    if self.nPast >= self.contextParams.context - 4{
-                        self.nPast = self.nPast / 2
-                        outputToken = self.llm_token_eos()
-                        try ExceptionCatcher.catchException {
-                            _ = try? self.llm_eval(inputBatch: [outputToken])
-                        }
-                        print("Context Limit!")
-//                        throw ModelError.contextLimit
+                    var eval_res: Bool? = nil
+                    if self.nPast >= self.contextParams.context - 4 {
+//                        self.nPast = self.nPast / 2
+//                        outputToken = self.llm_token_eos()
+//                        try ExceptionCatcher.catchException {
+//                            _ = try? self.llm_eval(inputBatch: [outputToken])
+//                        }
+//                        print("Context Limit!")
+                        throw ModelError.contextLimit
                     }
                     try ExceptionCatcher.catchException {
                         eval_res = try? self.llm_eval(inputBatch: [outputToken])
@@ -611,7 +613,7 @@ public class LLMBase {
             print("Past token count: \(nPast)/\(contextLength) (\(past.count))")
             // Return full string for case without callback
             return output.joined()
-        }catch{
+        } catch {
             print(error)
             throw error
         }
