@@ -472,7 +472,7 @@ public class LLMBase {
         }
     }
 
-    public func predict(_ input: String, _ callback: ((String, Double) -> Bool) ) throws -> String {
+    public func predict(_ input: String, _ callback: ((String, Double) async -> Bool) ) async throws -> String {
         let params = sampleParams
         let contextLength = Int32(contextParams.context)
 //        print("Past token count: \(nPast)/\(contextLength) (\(past.count))")
@@ -575,7 +575,7 @@ public class LLMBase {
                     let (output, time) = Utils.time {
                         return str
                     }
-                    if callback(output, time) {
+                    if await callback(output, time) {
                         // Early exit if requested by callback
                         print(" * exit requested by callback *")
                         //generating = false
