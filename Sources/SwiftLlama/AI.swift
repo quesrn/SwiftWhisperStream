@@ -93,7 +93,7 @@ public actor AI {
         try model.preparePast(messages: messages)
     }
     
-    public func conversation(_ input: String, _ tokenCallback: @escaping (String, Double) async -> ()) async throws -> String {
+    public func conversation(_ input: String, _ tokenCallback: @escaping (String, String, Double) async -> String) async throws -> String {
         flagResponding = true
         flagExit = false
         
@@ -107,17 +107,17 @@ public actor AI {
         
         var output: String?
 //            try ExceptionCatcher.catchException {
-        output = try await model.predict(input) { str, time in
+        output = try await model.predict(input) { str, textSoFar, time in
             if flagExit {
                 flagExit = false
-                return true
+                return (true, textSoFar)
             }
-            await tokenCallback(str, time)
+            let processedTextSoFar = await tokenCallback(str, textSoFar, time)
             if flagExit {
                 flagExit = false
-                return true
+                return (true, processedTextSoFar)
             }
-            return false
+            return (false, processedTextSoFar)
         }
 //            }
         

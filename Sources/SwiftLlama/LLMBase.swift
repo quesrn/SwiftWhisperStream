@@ -472,7 +472,7 @@ public class LLMBase {
         }
     }
 
-    public func predict(_ input: String, _ callback: ((String, Double) async -> Bool) ) async throws -> String {
+    public func predict(_ input: String, _ callback: ((String, String, Double) async -> (Bool, String)) ) async throws -> String {
         let params = sampleParams
         let contextLength = Int32(contextParams.context)
 //        print("Past token count: \(nPast)/\(contextLength) (\(past.count))")
@@ -523,7 +523,7 @@ public class LLMBase {
             // Output
             var outputRepeatTokens: [ModelToken] = []
             var outputTokens: [ModelToken] = []
-            var output = [String]()
+            var output = ""
             // Loop until target count is reached
             var outputEnabled = true
             while outputEnabled {
@@ -570,12 +570,14 @@ public class LLMBase {
                 // Convert token to string and callback
 //                self.session_tokens.append(outputToken)
                 if !skipCallback, let str = llm_token_to_str(outputToken: outputToken){
-                    output.append(str)
+                    output += str
                     // Per token callback
-                    let (output, time) = Utils.time {
+                    let (incrementalStr, time) = Utils.time {
                         return str
                     }
-                    if await callback(output, time) {
+                    let (check, processedTextSoFar) = await callback(incrementalStr, output, time)
+                    output = processedTextSoFar
+                    if check {
                         // Early exit if requested by callback
                         print(" * exit requested by callback *")
                         //generating = false
@@ -612,7 +614,7 @@ public class LLMBase {
             print("Total tokens: \(inputTokensCount + outputTokens.count) (\(inputTokensCount) -> \(outputTokens.count))")
             print("Past token count: \(nPast)/\(contextLength) (\(past.count))")
             // Return full string for case without callback
-            return output.joined()
+            return output
         } catch {
             print(error)
             throw error
