@@ -93,7 +93,7 @@ public actor AI {
         try model.preparePast(messages: messages)
     }
     
-    public func conversation(_ input: String, _ tokenCallback: @escaping (String, String, Double) async -> String) async throws -> String {
+    public func conversation(_ input: String, _ tokenCallback: @escaping (String, String, Double) async -> (Bool, String)) async throws -> String {
         flagResponding = true
         flagExit = false
         
@@ -112,12 +112,12 @@ public actor AI {
                 flagExit = false
                 return (true, textSoFar)
             }
-            let processedTextSoFar = await tokenCallback(str, textSoFar, time)
+            let (check, processedTextSoFar) = await tokenCallback(str, textSoFar, time)
             if flagExit {
                 flagExit = false
                 return (true, processedTextSoFar)
             }
-            return (false, processedTextSoFar)
+            return (check, processedTextSoFar)
         }
 //            }
         
