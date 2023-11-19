@@ -113,6 +113,10 @@ public actor AI {
                 return true
             }
             await tokenCallback(str, time)
+            if flagExit {
+                flagExit = false
+                return true
+            }
             return false
         }
 //            }
