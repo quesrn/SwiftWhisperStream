@@ -24,16 +24,10 @@ let package = Package(
             dependencies: [
                 .product(name: "libfvad", package: "libfvad-ios"),
                 .target(name: "whisper_cpp"),
-//                .target(name: "LibWhisper"),
             ], swiftSettings: [.interoperabilityMode(.Cxx)]),
         .target(name: "SwiftLlama", dependencies: [
             .target(name: "whisper_cpp"),
         ], swiftSettings: [.interoperabilityMode(.Cxx)]),
-//        .target(name: "LibWhisper", dependencies: [
-//            .product(name: "SDL", package: "SwiftSDL2"),
-//            .product(name: "llama", package: "llama.cpp"),
-//            .target(name: "whisper_cpp"),
-//        ]),
         .target(
             name: "whisper_cpp",
             dependencies: [
