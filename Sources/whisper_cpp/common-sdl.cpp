@@ -12,7 +12,7 @@ audio_async::~audio_async() {
     }
 }
 
-bool audio_async::init(int capture_id, int sample_rate, void *vad, SDL_AudioCallback rawCallback) {
+bool audio_async::init(int capture_id, int sample_rate) {
     SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO);
 
     if (SDL_Init(SDL_INIT_AUDIO) < 0) {
@@ -35,10 +35,7 @@ bool audio_async::init(int capture_id, int sample_rate, void *vad, SDL_AudioCall
 
     SDL_zero(capture_spec_requested);
     SDL_zero(capture_spec_obtained);
-    
-    this->vad = vad;
-    this->rawCallback = rawCallback;
-    
+
     capture_spec_requested.freq     = sample_rate;
     capture_spec_requested.format   = AUDIO_F32;
     capture_spec_requested.channels = 1;
@@ -142,10 +139,13 @@ void audio_async::callback(uint8_t * stream, int len) {
         return;
     }
 
-    const size_t n_samples = len / sizeof(float);
+    size_t n_samples = len / sizeof(float);
 
-    m_audio_new.resize(n_samples);
-    memcpy(m_audio_new.data(), stream, n_samples * sizeof(float));
+    if (n_samples > m_audio.size()) {
+        n_samples = m_audio.size();
+
+        stream += (len - (n_samples * sizeof(float)));
+    }
 
     //fprintf(stderr, "%s: %zu samples, pos %zu, len %zu\n", __func__, n_samples, m_audio_pos, m_audio_len);
 
@@ -156,7 +156,7 @@ void audio_async::callback(uint8_t * stream, int len) {
             const size_t n0 = m_audio.size() - m_audio_pos;
 
             memcpy(&m_audio[m_audio_pos], stream, n0 * sizeof(float));
-            memcpy(&m_audio[0], &stream[n0], (n_samples - n0) * sizeof(float));
+            memcpy(&m_audio[0], stream + n0 * sizeof(float), (n_samples - n0) * sizeof(float));
 
             m_audio_pos = (m_audio_pos + n_samples) % m_audio.size();
             m_audio_len = m_audio.size();

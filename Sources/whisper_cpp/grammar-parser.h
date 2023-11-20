@@ -1,5 +1,5 @@
 // Implements a parser for an extended Backus-Naur form (BNF), producing the
-// binary context-free grammar format specified by llama.h. Supports character
+// binary context-free grammar format specified by whisper.h. Supports character
 // ranges, grouping, and repetition operators. As an example, a grammar for
 // arithmetic might look like:
 //
@@ -10,7 +10,7 @@
 // space ::= [ \t\n]*
 
 #pragma once
-#include "llama.h"
+#include "whisper.h"
 #include <vector>
 #include <map>
 #include <cstdint>
@@ -18,10 +18,10 @@
 
 namespace grammar_parser {
     struct parse_state {
-        std::map<std::string, uint32_t>                 symbol_ids;
-        std::vector<std::vector<llama_grammar_element>> rules;
+        std::map<std::string, uint32_t>                   symbol_ids;
+        std::vector<std::vector<whisper_grammar_element>> rules;
 
-        std::vector<const llama_grammar_element *> c_rules();
+        std::vector<const whisper_grammar_element *>      c_rules() const;
     };
 
     parse_state parse(const char * src);

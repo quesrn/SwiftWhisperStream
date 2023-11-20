@@ -14,7 +14,6 @@
 #include <locale>
 #include <codecvt>
 #include <sstream>
-#include <algorithm>
 
 #if defined(_MSC_VER)
 #pragma warning(disable: 4244 4267) // possible loss of data
