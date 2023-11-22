@@ -9,21 +9,14 @@ import Foundation
 import whisper_cpp
 
 public enum ModelInference {
-//    case LLama_bin
     case LLama_gguf
-//    case GPTNeox
-//    case GPT2
-//    case Replit
-//    case Starcoder
-//    case Starcoder_gguf
-//    case RWKV
 }
 
 public actor AI {
 //    var aiQueue = DispatchQueue(label: "LLMFarm-Main", qos: .userInitiated, attributes: .concurrent, autoreleaseFrequency: .inherit, target: nil)
     
     //var model: Model!
-    public var model: LLMBase!
+    public var model: LLaMa!
     public var modelPath: String
     public var modelName: String
     
@@ -130,7 +123,7 @@ public actor AI {
 
 private typealias _ModelProgressCallback = (_ progress: Float, _ userData: UnsafeMutableRawPointer?) -> Void
 
-public typealias ModelProgressCallback = (_ progress: Float, _ model: LLMBase) -> Void
+public typealias ModelProgressCallback = (_ progress: Float, _ model: LLaMa) -> Void
 
 func get_path_by_lora_name(_ model_name:String, dest:String = "lora_adapters") -> String? {
     //#if os(iOS) || os(watchOS) || os(tvOS)
