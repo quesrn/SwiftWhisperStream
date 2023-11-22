@@ -72,6 +72,9 @@ public actor AI {
     
     public func conversation(_ input: String, _ tokenCallback: @escaping (String, String, Double) async -> (Bool, String)?) async throws -> String {
         flagResponding = true
+        await Task { @MainActor in
+            didFlagExitDueToStopWord = false
+        }.value
         flagExit = false
         
         defer {
