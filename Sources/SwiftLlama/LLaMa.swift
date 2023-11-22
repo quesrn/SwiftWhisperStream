@@ -25,16 +25,17 @@ public enum ModelLoadError: Error {
 
 public class LLaMa {
     public var model: OpaquePointer?
-    public var hardware_arch: String=""
+    public var hardware_arch = ""
  
     public var context: OpaquePointer?
     public var grammar: OpaquePointer?
     public var contextParams: ModelAndContextParams
     public var sampleParams: ModelSampleParams = .default
-    public var custom_prompt_format = ""
+    public var systemFormat = ""
+    public var promptFormat = ""
 //    public var core_resourses = get_core_bundle_path()
-    public var reverse_prompt: [String] = []
 //    public var session_tokens: [Int32] = []
+    
     private var batch: llama_batch
     // Used to keep old context until it needs to be rotated or purge out for new tokens
     var past: [[ModelToken]] = [] // Will house both queries and responses in order
@@ -162,7 +163,7 @@ public class LLaMa {
         
         // Tokenize with prompt format
         var inputTokens = Array(past.joined())
-        let promptTokens = tokenizePrompt(input)
+        let promptTokens = tokenizePrompt(input, format: promptFormat)
         if promptTokens.count == 0 {
             return ""
         }
@@ -350,16 +351,14 @@ public class LLaMa {
         return resultStr
     }
     
-    public func tokenizePrompt(_ input: String, output: String? = nil) -> [ModelToken] {
-        var formated_input = self.custom_prompt_format.replacingOccurrences(of: "{{prompt}}", with: input)
+    public func tokenizePrompt(_ input: String, format: String, output: String? = nil) -> [ModelToken] {
+        var formated_input = format.replacingOccurrences(of: "{{prompt}}", with: input)
         if let output = output {
-            formated_input += "\n" + output
+            formated_input += output
         }
+        // TODO: Maybe not necessary?
         formated_input = formated_input.replacingOccurrences(of: "\\n", with: "\n")
-        var bos = true
-        if formated_input.contains("<s>"){
-            bos = false
-        }
+        let bos = !formated_input.contains("<s>")
         return llm_tokenize(formated_input, bos: bos)
     }
     
@@ -477,7 +476,7 @@ public class LLaMa {
         past.removeAll(keepingCapacity: true)
         nPast = 0
         
-        var inputTokens = tokenizePrompt(prompt)
+        var inputTokens = tokenizePrompt(prompt, format: systemFormat)
         if inputTokens.count == 0 {
             return
         }
@@ -497,7 +496,7 @@ public class LLaMa {
             let (input, output) = message
             //        print("Past token count: \(nPast)/\(contextLength) (\(past.count))")
             // Tokenize with prompt format
-            var inputTokens = tokenizePrompt(input, output: output)
+            var inputTokens = tokenizePrompt(input, format: promptFormat, output: output)
             if inputTokens.count == 0 {
                 return
             }
@@ -510,7 +509,11 @@ public class LLaMa {
                 throw ModelError.inputTooLong
             }
             // Output
-            var outputTokens = tokenizePrompt(input, output: output)
+//            var outputTokens = tokenizePrompt(input, format: promptFormat, output: output)
+            // TODO: Maybe not necessary for output?
+            let bos = !output.contains("<s>")
+            let outputTokens = llm_tokenize(output, bos: bos)
+
             // Update past with most recent response
             past.append(outputTokens)
         }
@@ -539,7 +542,7 @@ public class LLaMa {
         let n_tokens = Int32(input.utf8.count) + (bos == true ? 1 : 0)
         var embeddings: [llama_token] = Array<llama_token>(repeating: llama_token(), count: input.utf8.count)
         let n = llama_tokenize(self.model, input, Int32(input.utf8.count), &embeddings, n_tokens, bos, true)
-        if n<=0{
+        if n <= 0 {
             return []
         }
         if Int(n) <= embeddings.count {
