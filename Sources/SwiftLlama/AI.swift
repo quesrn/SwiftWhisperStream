@@ -145,50 +145,6 @@ func get_path_by_lora_name(_ model_name:String, dest:String = "lora_adapters") -
     return nil
 }
 
-//public func get_model_sample_param_by_config(_ model_config:Dictionary<String, AnyObject>) -> ModelSampleParams{
-//    var tmp_param = ModelSampleParams.default
-//    if (model_config["n_batch"] != nil){
-//        tmp_param.n_batch = model_config["n_batch"] as! Int32
-//    }
-//    if (model_config["temp"] != nil){
-//        tmp_param.temp = Float(model_config["temp"] as! Double)
-//    }
-//    if (model_config["top_k"] != nil){
-//        tmp_param.top_k = model_config["top_k"] as! Int32
-//    }
-//    if (model_config["top_p"] != nil){
-//        tmp_param.top_p = Float(model_config["top_p"] as! Double)
-//    }
-//    if (model_config["tfs_z"] != nil){
-//        tmp_param.tfs_z = Float(model_config["tfs_z"] as! Double)
-//    }
-//    if (model_config["typical_p"] != nil){
-//        tmp_param.typical_p = Float(model_config["typical_p"] as! Double)
-//    }
-//    if (model_config["repeat_penalty"] != nil){
-//        tmp_param.repeat_penalty = Float(model_config["repeat_penalty"] as! Double)
-//    }
-//    if (model_config["repeat_last_n"] != nil){
-//        tmp_param.repeat_last_n = model_config["repeat_last_n"] as! Int32
-//    }
-//    if (model_config["frequence_penalty"] != nil){
-//        tmp_param.frequence_penalty = Float(model_config["frequence_penalty"] as! Double)
-//    }
-//    if (model_config["presence_penalty"] != nil){
-//        tmp_param.presence_penalty = Float(model_config["presence_penalty"] as! Double)
-//    }
-//    if (model_config["mirostat"] != nil){
-//        tmp_param.mirostat = model_config["mirostat"] as! Int32
-//    }
-//    if (model_config["mirostat_tau"] != nil){
-//        tmp_param.mirostat_tau = Float(model_config["mirostat_tau"] as! Double)
-//    }
-//    if (model_config["mirostat_eta"] != nil){
-//        tmp_param.mirostat_eta = Float(model_config["mirostat_tau"] as! Double)
-//    }
-//    
-//    return tmp_param
-//}
 //
 //public func get_model_context_param_by_config(_ model_config:Dictionary<String, AnyObject>) -> ModelAndContextParams{
 //    var tmp_param = ModelAndContextParams.default

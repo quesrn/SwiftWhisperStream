@@ -31,8 +31,6 @@ public class LLaMa {
     public var grammar: OpaquePointer?
     public var contextParams: ModelAndContextParams
     public var sampleParams: ModelSampleParams = .default
-    public var systemFormat: ModelPromptStyle = .None
-    public var promptFormat: ModelPromptStyle = .None
     public var custom_prompt_format = ""
 //    public var core_resourses = get_core_bundle_path()
     public var reverse_prompt: [String] = []
