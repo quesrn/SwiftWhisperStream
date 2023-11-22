@@ -29,6 +29,7 @@ public actor AI {
         }
     }
     @MainActor public var didFlagExit = false
+    @MainActor public var didFlagExitDueToStopWord = false
     private(set) var flagResponding = false
     
     @MainActor public var context: Int32 = 0
