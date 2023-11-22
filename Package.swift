@@ -44,8 +44,8 @@ let package = Package(
 //            ],
             publicHeadersPath: "include",
             cxxSettings: [
-                .unsafeFlags(["-Ofast"]), //comment this if you need to Debug llama_cpp
-//                .unsafeFlags(["-O3"]),
+//                .unsafeFlags(["-Ofast"]), // comment this if you need to Debug llama_cpp
+                .unsafeFlags(["-O3"]),
                 .unsafeFlags(["-mfma","-mfma","-mavx","-mavx2","-mf16c","-msse3","-mssse3"]), //for Intel CPU
                 .unsafeFlags(["-DGGML_METAL_NDEBUG"]),
                 .unsafeFlags(["-DGGML_USE_K_QUANTS"]),
