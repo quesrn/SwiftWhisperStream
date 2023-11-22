@@ -45,7 +45,7 @@ bool audio_async::init(int capture_id, int sample_rate, void *vad, SDL_AudioCall
     capture_spec_requested.samples  = 1024;
     capture_spec_requested.callback = [](void * userdata, uint8_t * stream, int len) {
         audio_async * audio = (audio_async *) userdata;
-//        audio->rawCallback(audio->vad, stream, len);
+        audio->rawCallback(audio->vad, stream, len);
         audio->callback(stream, len);
     };
     capture_spec_requested.userdata = this;
