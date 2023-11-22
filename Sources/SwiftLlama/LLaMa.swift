@@ -209,7 +209,7 @@ public class LLaMa {
                 batch.logits[Int(batch.n_tokens) - 1] = 1 // true
                 
                 if llama_decode(context, batch) != 0 {
-                    print("llama_decode() failed")
+                    throw ModelError.failedToEval
                 }
                 
 //                var eval_res: Bool? = nil
