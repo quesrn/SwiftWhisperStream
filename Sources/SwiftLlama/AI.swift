@@ -44,8 +44,7 @@ public actor AI {
         flagExit = true
     }
     
-    public func loadModel(_ aiModel: ModelInference, contextParams: ModelAndContextParams = .default) async throws -> Bool {
-//        print("AI init")
+    public func loadModel(_ aiModel: ModelInference, contextParams: ModelAndContextParams = .default) async throws {
         await Task { @MainActor in
             context = contextParams.context
             nBatch = contextParams.n_batch
@@ -53,27 +52,11 @@ public actor AI {
 
         do {
             switch aiModel {
-//            case .LLama_bin:
-//                model = try LLaMa_dadbed9(path: self.modelPath, contextParams: contextParams)
             case .LLama_gguf:
                 model = try LLaMa(path: self.modelPath, contextParams: contextParams)
-//            case .GPTNeox:
-//                model = try GPTNeoX(path: self.modelPath, contextParams: contextParams)
-//            case .GPT2:
-//                model = try GPT2(path: self.modelPath, contextParams: contextParams)
-//            case .Replit:
-//                model = try Replit(path: self.modelPath, contextParams: contextParams)
-//            case .Starcoder:
-//                model = try Starcoder(path: self.modelPath, contextParams: contextParams)
-//            case .Starcoder_gguf:
-//                model = try LLaMa(path: self.modelPath, contextParams: contextParams)
-//            case .RWKV:
-//                model = try RWKV(path: self.modelPath, contextParams: contextParams)
             }
-            return true
-        }
-        catch {
-            //            print(error)
+        } catch {
+            print(error)
             throw error
         }
     }
