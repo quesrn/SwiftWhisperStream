@@ -6,7 +6,9 @@
 //
 
 import Foundation
-import whisper_cpp
+//import whisper_cpp
+import llama
+import llama_cpp_helpers
 
 public enum ModelLoadError: Error {
     // Throw when an invalid password is entered

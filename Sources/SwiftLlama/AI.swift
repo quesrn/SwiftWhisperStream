@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import whisper_cpp
+import llama_cpp_helpers
 
 public enum ModelInference {
     case LLama_gguf

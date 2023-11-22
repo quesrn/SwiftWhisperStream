@@ -12,6 +12,7 @@ let package = Package(
         .library(name: "SwiftWhisperStream", targets: ["SwiftWhisperStream"]),
         .library(name: "SwiftLlama", targets: ["SwiftLlama"]),
         .library(name: "whisper_cpp", targets: ["whisper_cpp"]),
+        .library(name: "llama_cpp_helpers", targets: ["llama_cpp_helpers"]),
     ],
     dependencies: [
         .package(url: "https://github.com/lake-of-fire/SwiftSDL2.git", branch: "master"),
@@ -26,8 +27,15 @@ let package = Package(
                 .target(name: "whisper_cpp"),
             ], swiftSettings: [.interoperabilityMode(.Cxx)]),
         .target(name: "SwiftLlama", dependencies: [
-            .target(name: "whisper_cpp"),
+            .target(name: "llama_cpp_helpers"),
         ], swiftSettings: [.interoperabilityMode(.Cxx)]),
+        .target(
+            name: "llama_cpp_helpers",
+            dependencies: [
+                .product(name: "llama", package: "llama.cpp"),
+            ],
+            publicHeadersPath: "include",
+            swiftSettings: [.interoperabilityMode(.Cxx)]),
         .target(
             name: "whisper_cpp",
             dependencies: [
