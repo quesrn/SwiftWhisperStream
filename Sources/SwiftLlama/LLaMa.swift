@@ -385,11 +385,11 @@ public class LLaMa {
         let n_ctx = llama_n_ctx(ctx)
         
         // Auto params
-        let top_k = top_k <= 0 ? llama_n_vocab(ctx) : top_k
+        let top_k = top_k <= 0 ? llama_n_vocab(model) : top_k
         let repeat_last_n = repeat_last_n < 0 ? n_ctx : repeat_last_n
         
         //
-        let vocabSize = llama_n_vocab(ctx)
+        let vocabSize = llama_n_vocab(model)
         guard let logits = llama_get_logits_ith(context, batch.n_tokens - 1) else {
             print("GPT sample error logits nil")
             return 0
@@ -401,7 +401,7 @@ public class LLaMa {
         var candidates_p = llama_token_data_array(data: candidates.mutPtr, size: candidates.count, sorted: false)
         
         // Apply penalties
-        let nl_token = Int(llama_token_nl(self.model))
+        let nl_token = Int(llama_token_nl(model))
         //        let nl_logit = logits[nl_token]
         let nl_index = max(0, min(Int(vocabSize) - 1, nl_token))
         let nl_logit = logits[nl_index]
