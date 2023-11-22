@@ -41,6 +41,7 @@ let package = Package(
             dependencies: [
                 .product(name: "SDL", package: "SwiftSDL2"),
                 .product(name: "llama", package: "llama.cpp"),
+                .target(name: "llama_cpp_helpers"),
             ],
 //                "Resources/metal/ggml-metal_dadbed9.metal",
 //                "Resources/metal/ggml-metal_from-llmfarm.metal",
