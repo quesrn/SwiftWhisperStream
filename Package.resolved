@@ -15,7 +15,7 @@
       "location" : "https://github.com/lake-of-fire/llama.cpp.git",
       "state" : {
         "branch" : "master",
-        "revision" : "1484f986471e6786863faa57b83d79ffcd7cd33d"
+        "revision" : "971e5c48fabb5cd70c53b718bab2962d64cd39f7"
       }
     },
     {
@@ -24,7 +24,7 @@
       "location" : "https://github.com/lake-of-fire/SwiftSDL2.git",
       "state" : {
         "branch" : "master",
-        "revision" : "d992d23d8983a5662d5f3282c4ec26443668f332"
+        "revision" : "138eee3979b0bd020675861c0316d08a8d31e4a4"
       }
     }
   ],
