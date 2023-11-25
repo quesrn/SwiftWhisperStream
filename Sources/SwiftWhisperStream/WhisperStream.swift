@@ -78,7 +78,7 @@ public class WhisperStream: Thread {
         waiter.wait()
     }
 
-    private func deactivate() {
+    public func deactivate() {
         device?.deactivateVAD()
         device?.close()
         clearAudio()
