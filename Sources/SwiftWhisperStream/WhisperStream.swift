@@ -177,7 +177,7 @@ public class WhisperStream: Thread {
                                 speechCoverage += duration
                             }
                             let speechRatio = Double(speechCoverage) / max(0, Double(t1) - Double(t0))
-                            if speechRatio.isNaN || speechRatio < 0.1 {
+                            if speechRatio.isNaN || speechRatio < 0.01 {
                                 print("SKIPPED \(speechRatio) \(text != nil ? String(cString: text!) : nil)")
                                 resultText = nil
                             } else {
