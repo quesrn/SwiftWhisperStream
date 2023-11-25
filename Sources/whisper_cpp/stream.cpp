@@ -72,7 +72,7 @@ stream_context *stream_init(stream_params params, void *vad, SDL_AudioCallback r
     ctx->n_samples_keep = (1e-3 * params.keep_ms) * WHISPER_SAMPLE_RATE;
     const int n_samples_30s = (1e-3 * 30000.0) * WHISPER_SAMPLE_RATE;
 
-    ctx->use_vad = ctx->n_samples_step <= 0; // sliding window mode uses VAD
+    ctx->use_vad = false;
 
     ctx->n_new_line = !ctx->use_vad ? std::max(1, params.length_ms / params.step_ms - 1) : 1; // number of steps to print new line
 
@@ -94,8 +94,11 @@ stream_context *stream_init(stream_params params, void *vad, SDL_AudioCallback r
         fprintf(stderr, "%s: unknown language '%s'\n", __func__, params.language);
         return NULL;
     }
-
-    if ((ctx->whisper = unique_whisper(whisper_init_from_file(params.model))) == NULL) {
+    
+    struct whisper_context_params cparams;
+    cparams.use_gpu = true;
+//    if ((ctx->whisper = unique_whisper(whisper_init_from_file(params.model))) == NULL) {
+    if ((ctx->whisper = unique_whisper(whisper_init_from_file_with_params(params.model, cparams))) == NULL) {
         return NULL;
     }
 
@@ -142,57 +145,37 @@ int stream_run(stream_context *ctx, void *callback_ctx, stream_callback_t callba
 
     auto t_now = std::chrono::high_resolution_clock::now();
 
-    if (!ctx->use_vad) {
-        while (true) {
-            ctx->audio->get(params.step_ms, ctx->pcmf32_new);
+    while (true) {
+        ctx->audio->get(params.step_ms, ctx->pcmf32_new);
 
-            if ((int)ctx->pcmf32_new.size() > 2 * ctx->n_samples_step) {
-                fprintf(stderr, "\n\n%s: WARNING: cannot process audio fast enough, dropping audio ...\n\n", __func__);
-                ctx->audio->clear();
-                continue;
-            }
-
-            if ((int)ctx->pcmf32_new.size() >= ctx->n_samples_step) {
-                ctx->audio->clear();
-                break;
-            }
-
-            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        if ((int)ctx->pcmf32_new.size() > 2 * ctx->n_samples_step) {
+            fprintf(stderr, "\n\n%s: WARNING: cannot process audio fast enough, dropping audio ...\n\n", __func__);
+            ctx->audio->clear();
+            continue;
         }
 
-        const int n_samples_new = ctx->pcmf32_new.size();
-
-        // take up to params.length_ms audio from previous iteration
-        const int n_samples_take = std::min((int)ctx->pcmf32_old.size(), std::max(0, ctx->n_samples_keep + ctx->n_samples_len - n_samples_new));
-
-        ctx->pcmf32.resize(n_samples_new + n_samples_take);
-
-        for (int i = 0; i < n_samples_take; i++) {
-            ctx->pcmf32[i] = ctx->pcmf32_old[ctx->pcmf32_old.size() - n_samples_take + i];
+        if ((int)ctx->pcmf32_new.size() >= ctx->n_samples_step) {
+            ctx->audio->clear();
+            break;
         }
 
-        memcpy(ctx->pcmf32.data() + n_samples_take, ctx->pcmf32_new.data(), n_samples_new * sizeof(float));
-
-        ctx->pcmf32_old = ctx->pcmf32;
-    } else {
-        auto t_diff = std::chrono::duration_cast<std::chrono::milliseconds>(t_now - ctx->t_last).count();
-        if (t_diff < 2000) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            return 0;
-        }
-        
-        // process new audio
-        ctx->audio->get(2000, ctx->pcmf32_new);
-        
-        if (::vad_simple(ctx->pcmf32_new, WHISPER_SAMPLE_RATE, 1000, params.vad_thold, params.freq_thold, false)) {
-            ctx->audio->get(params.length_ms, ctx->pcmf32);
-        } else {
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            return 0;
-        }
-        
-        ctx->t_last = t_now;
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
+
+    const int n_samples_new = ctx->pcmf32_new.size();
+
+    // take up to params.length_ms audio from previous iteration
+    const int n_samples_take = std::min((int)ctx->pcmf32_old.size(), std::max(0, ctx->n_samples_keep + ctx->n_samples_len - n_samples_new));
+
+    ctx->pcmf32.resize(n_samples_new + n_samples_take);
+
+    for (int i = 0; i < n_samples_take; i++) {
+        ctx->pcmf32[i] = ctx->pcmf32_old[ctx->pcmf32_old.size() - n_samples_take + i];
+    }
+
+    memcpy(ctx->pcmf32.data() + n_samples_take, ctx->pcmf32_new.data(), n_samples_new * sizeof(float));
+
+    ctx->pcmf32_old = ctx->pcmf32;
 
     // run the inference
     whisper_full_params wparams = whisper_full_default_params(WHISPER_SAMPLING_GREEDY);
