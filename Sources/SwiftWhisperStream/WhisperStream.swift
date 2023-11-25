@@ -79,14 +79,6 @@ public class WhisperStream: Thread {
     }
 
     public func deactivate() {
-        device?.deactivateVAD()
-        device?.close()
-        clearAudio()
-        if let streamContext = streamContext {
-            stream_free(streamContext)
-        }
-        streamContext = nil
-        alive = false
         cancel()
     }
     
@@ -202,7 +194,14 @@ public class WhisperStream: Thread {
                     }
                 }
                 
-                deactivate()
+                device?.deactivateVAD()
+                device?.close()
+                clearAudio()
+                if let streamContext = streamContext {
+                    stream_free(streamContext)
+                }
+                streamContext = nil
+                alive = false
             }
         }
     }

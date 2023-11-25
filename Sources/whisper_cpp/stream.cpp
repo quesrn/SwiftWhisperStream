@@ -28,7 +28,6 @@ struct stream_context {
     int n_samples_step;
     int n_samples_len;
     int n_samples_keep;
-    bool use_vad;
     int n_new_line;
     int n_iter = 0;
 };
@@ -72,12 +71,9 @@ stream_context *stream_init(stream_params params, void *vad, SDL_AudioCallback r
     ctx->n_samples_keep = (1e-3 * params.keep_ms) * WHISPER_SAMPLE_RATE;
     const int n_samples_30s = (1e-3 * 30000.0) * WHISPER_SAMPLE_RATE;
 
-    ctx->use_vad = false;
+    ctx->n_new_line = std::max(1, params.length_ms / params.step_ms - 1); // number of steps to print new line
 
-    ctx->n_new_line = !ctx->use_vad ? std::max(1, params.length_ms / params.step_ms - 1) : 1; // number of steps to print new line
-
-    params.no_timestamps = !ctx->use_vad;
-    params.no_context |= ctx->use_vad;
+    params.no_timestamps = true;
     params.max_tokens = 0;
 
     // init audio
@@ -187,7 +183,7 @@ int stream_run(stream_context *ctx, void *callback_ctx, stream_callback_t callba
     wparams.translate = params.translate;
     wparams.no_context = true;
     wparams.suppress_non_speech_tokens = params.suppress_non_speech_tokens;
-    wparams.single_segment = !ctx->use_vad;
+    wparams.single_segment = true;
     wparams.max_tokens = params.max_tokens;
     wparams.language = params.language;
     wparams.detect_language = params.detect_language;
@@ -211,18 +207,17 @@ int stream_run(stream_context *ctx, void *callback_ctx, stream_callback_t callba
     }
 
     const int n_segments = whisper_full_n_segments(whisper);
+            fprintf(stderr, "%s: whisper full n segments '%d'\n", __func__, n_segments);
+
     for (int i = 0; i < n_segments; ++i) {
         const char *text = whisper_full_get_segment_text(whisper, i);
 
-        const int64_t segment_t0 = whisper_full_get_segment_t0(whisper, i);
-        const int64_t segment_t1 = whisper_full_get_segment_t1(whisper, i);
-
-        callback(text, ctx->use_vad ? segment_t0 : t0, ctx->use_vad ? segment_t1 : t1, format_time_point(ctx->t_start), callback_ctx);
+        callback(text, t0, t1, format_time_point(ctx->t_start), callback_ctx);
     }
 
     ++ctx->n_iter;
 
-    if (!ctx->use_vad && (ctx->n_iter % ctx->n_new_line) == 0) {
+    if ((ctx->n_iter % ctx->n_new_line) == 0) {
         callback(NULL, 0, 0, format_time_point(ctx->t_start), callback_ctx);
 
         // keep part of the audio for next iteration to try to mitigate word boundary issues
