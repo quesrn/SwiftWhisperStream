@@ -1,3 +1,7 @@
+import Foundation
+#if os(iOS)
+import UIKit
+#endif
 import AVFoundation
 import whisper_cpp
 
@@ -34,13 +38,24 @@ public class WhisperStream: Thread {
     // Define a class-level lock to ensure serial execution of stream_init
     private static let streamInitLock = NSLock()
 
+ #if os(iOS)
+   var resignObserver: NSObjectProtocol?
+#endif
+    
     public init(model: URL, device: CaptureDevice? = nil/*, window: TimeInterval = (60 * 5)*/, suppressNonSpeechOutput: Bool = false, language: String? = nil) {
         self.model = model
         self.device = device
 //        self.window = window
         self.suppressNonSpeechOutput = suppressNonSpeechOutput
         self.language = language?.lowercased() ?? ""
+        
         super.init()
+        
+#if os(iOS)
+        resignObserver = NotificationCenter.default.addObserver(forName: UIScene.willDeactivateNotification, object: nil, queue: nil) { [weak self] _ in
+            self?.deactivate()
+        }
+#endif
     }
 
     deinit {
@@ -53,7 +68,7 @@ public class WhisperStream: Thread {
         waiter.enter()
         super.start()
     }
-
+    
     public override func main() {
         task()
         waiter.leave()
@@ -63,6 +78,18 @@ public class WhisperStream: Thread {
         waiter.wait()
     }
 
+    private func deactivate() {
+        device?.deactivateVAD()
+        device?.close()
+        clearAudio()
+        if let streamContext = streamContext {
+            stream_free(streamContext)
+        }
+        streamContext = nil
+        alive = false
+        cancel()
+    }
+    
     func task() {
         device?.activateVAD()
         guard let vad = device?.vad else { return }
@@ -175,10 +202,7 @@ public class WhisperStream: Thread {
                     }
                 }
                 
-                device?.deactivateVAD()
-                stream_free(ctx)
-                streamContext = nil
-                alive = false
+                deactivate()
             }
         }
     }
