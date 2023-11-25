@@ -207,7 +207,6 @@ int stream_run(stream_context *ctx, void *callback_ctx, stream_callback_t callba
     }
 
     const int n_segments = whisper_full_n_segments(whisper);
-            fprintf(stderr, "%s: whisper full n segments '%d'\n", __func__, n_segments);
 
     for (int i = 0; i < n_segments; ++i) {
         const char *text = whisper_full_get_segment_text(whisper, i);
