@@ -46,15 +46,20 @@ let package = Package(
 //                "Resources/metal/ggml-metal_dadbed9.metal",
 //                "Resources/metal/ggml-metal_from-llmfarm.metal",
 //            ],
-//            resources: [
-//                .process("ggml-metal.metal"),
+            resources: [
+                .process("ggml-metal.metal"),
 //                .copy("Resources/tokenizers"),
 //                .copy("Resources/metal")
-//            ],
+            ],
             publicHeadersPath: "include",
+            cSettings: [
+//                .unsafeFlags(["-Ofast"]), // comment this if you need to Debug llama_cpp
+                .unsafeFlags(["-fno-objc-arc"]),
+            ],
             cxxSettings: [
 //                .unsafeFlags(["-Ofast"]), // comment this if you need to Debug llama_cpp
                 .unsafeFlags(["-O3"]),
+                .unsafeFlags(["-fno-objc-arc"]),
                 .unsafeFlags(["-mfma","-mfma","-mavx","-mavx2","-mf16c","-msse3","-mssse3"]), //for Intel CPU
                 .unsafeFlags(["-DGGML_METAL_NDEBUG"]),
                 .unsafeFlags(["-DGGML_USE_K_QUANTS"]),
@@ -67,8 +72,10 @@ let package = Package(
                 .define("GGML_USE_METAL", .when(platforms: [.macOS, .macCatalyst, .iOS])),
                 .unsafeFlags(["-DNDEBUG"]),
                 .unsafeFlags(["-pthread"]),
-                .unsafeFlags(["-fno-objc-arc"]),
             ],
-            swiftSettings: [.interoperabilityMode(.Cxx)]),
+            swiftSettings: [.interoperabilityMode(.Cxx)],
+            linkerSettings: [
+                .linkedFramework("Accelerate")
+            ]),
     ],
     cxxLanguageStandard: CXXLanguageStandard.cxx2b)
