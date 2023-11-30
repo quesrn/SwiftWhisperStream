@@ -257,6 +257,9 @@ public class LLaMa {
                 // Repeat tokens update
                 outputRepeatTokens.append(outputToken)
                 if outputRepeatTokens.count > params.repeat_last_n {
+                    if let first = outputRepeatTokens.first {
+                        print("AI remove first token \(token_to_piece(token: first))")
+                    }
                     outputRepeatTokens.removeFirst()
                 }
                 // Check for eos - end early - check eos before bos in case they are the same
@@ -285,7 +288,7 @@ public class LLaMa {
                     output = processedTextSoFar
                     if check {
                         // Early exit if requested by callback
-                        print(" * exit requested by callback *")
+                        print("* exit requested by callback *")
                         //generating = false
                         outputEnabled = false //outputRemaining = 0
                         break
