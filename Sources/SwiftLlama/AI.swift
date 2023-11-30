@@ -63,14 +63,17 @@ public actor AI {
     }
     
     public func reinitializeSystemPrompt(_ prompt: String) throws {
+        print("AI reinit system prompt: \(prompt)")
         try model.reinitializeSystemPrompt(prompt)
     }
     
     public func conversationHistory(allMessages messages: [(String, String)]) throws {
+        print("AI conversation history: \(messages)")
         try model.preparePast(messages: messages)
     }
     
     public func conversation(_ input: String, _ tokenCallback: @escaping (String, String, Double) async -> (Bool, String)?) async throws -> String {
+        print("AI new input: \(input)")
         flagResponding = true
         await Task { @MainActor in
             didFlagExitDueToStopWord = false
@@ -92,6 +95,7 @@ public actor AI {
                 flagExit = false
                 return (true, textSoFar)
             }
+            print("AI Predicted next: \(str)")
             guard let (check, processedTextSoFar) = await tokenCallback(str, textSoFar, time) else {
                 return (true, textSoFar)
             }
@@ -103,6 +107,7 @@ public actor AI {
         }
 //            }
         
+        print("AI Predicted: \(output)")
         return output ?? "[Error]"
     }
 
