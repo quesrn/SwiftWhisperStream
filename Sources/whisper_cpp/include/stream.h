@@ -26,6 +26,7 @@ typedef struct stream_params {
     bool no_context;
     bool no_timestamps;
     bool suppress_non_speech_tokens;
+    bool use_gpu;
 
     const char *language;
     bool detect_language;

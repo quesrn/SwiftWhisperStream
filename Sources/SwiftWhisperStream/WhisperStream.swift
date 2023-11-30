@@ -92,6 +92,11 @@ public class WhisperStream: Thread {
                 params.model = modelCStr
                 params.language = languageCStr
                 params.suppress_non_speech_tokens = false
+#if os(iOS)
+                params.use_gpu = MTLCreateSystemDefaultDevice()?.supportsFamily(.apple4) ?? false
+#else
+                params.use_gpu = MTLCreateSystemDefaultDevice()?.supportsFamily(.mac2) ?? false
+#endif
                 
                 if let device = device {
                     params.capture_id = device.id

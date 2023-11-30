@@ -53,6 +53,7 @@ struct stream_params stream_default_params() {
         /* .no_context    =*/ false, // true
         /* .no_timestamps =*/ false,
         /* .suppress_non_speech_tokens =*/ false,
+        /* .use_gpu =*/ true,
 
         /* .language      =*/ "",
         /* .detect_language =*/ false,
@@ -92,7 +93,7 @@ stream_context *stream_init(stream_params params, void *vad, SDL_AudioCallback r
     }
     
     struct whisper_context_params cparams;
-    cparams.use_gpu = true;
+    cparams.use_gpu = params.use_gpu;
 //    if ((ctx->whisper = unique_whisper(whisper_init_from_file(params.model))) == NULL) {
     if ((ctx->whisper = unique_whisper(whisper_init_from_file_with_params(params.model, cparams))) == NULL) {
         return NULL;
