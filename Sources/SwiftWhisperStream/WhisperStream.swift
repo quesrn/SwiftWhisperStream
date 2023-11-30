@@ -42,6 +42,14 @@ public class WhisperStream: Thread {
    var resignObserver: NSObjectProtocol?
 #endif
     
+    public static var canUseGPU: Bool {
+#if os(iOS)
+        return MTLCreateSystemDefaultDevice()?.supportsFamily(.apple4) ?? false
+#else
+        return MTLCreateSystemDefaultDevice()?.supportsFamily(.mac2) ?? false
+#endif
+    }
+    
     public init(model: URL, device: CaptureDevice? = nil/*, window: TimeInterval = (60 * 5)*/, suppressNonSpeechOutput: Bool = false, language: String? = nil) {
         self.model = model
         self.device = device
@@ -92,11 +100,7 @@ public class WhisperStream: Thread {
                 params.model = modelCStr
                 params.language = languageCStr
                 params.suppress_non_speech_tokens = false
-#if os(iOS)
-                params.use_gpu = MTLCreateSystemDefaultDevice()?.supportsFamily(.apple4) ?? false
-#else
-                params.use_gpu = MTLCreateSystemDefaultDevice()?.supportsFamily(.mac2) ?? false
-#endif
+                params.use_gpu = Self.canUseGPU
                 
                 if let device = device {
                     params.capture_id = device.id
