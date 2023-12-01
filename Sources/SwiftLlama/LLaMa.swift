@@ -410,19 +410,19 @@ public class LLaMa {
         //        llama_sample_repetition_penalty(ctx, &candidates_p,
         //                    last_n_tokens.mutPtr.advanced(by: last_n_tokens.count - Int(repeat_last_n)),
         //                    Int(repeat_last_n), repeat_penalty)
-        if !last_n_tokens.isEmpty {
-            llama_sample_repetition_penalties(
-                ctx,
-                &candidates_p,
-                last_n_tokens.mutPtr.advanced(by: last_n_tokens.count - Int(repeat_last_n)),
-                Int(last_n_repeat),
-                repeat_penalty,
-                alpha_frequency,
-                alpha_presence)
-            if !penalize_nl {
-                logits[nl_token] = nl_logit
-            }
-        }
+//        if !last_n_tokens.isEmpty {
+//            llama_sample_repetition_penalties(
+//                ctx,
+//                &candidates_p,
+//                last_n_tokens.mutPtr.advanced(by: last_n_tokens.count - Int(repeat_last_n)),
+//                Int(last_n_repeat),
+//                repeat_penalty,
+//                alpha_frequency,
+//                alpha_presence)
+//            if !penalize_nl {
+//                logits[nl_token] = nl_logit
+//            }
+//        }
         
         if grammar != nil {
             llama_sample_grammar(ctx, &candidates_p, grammar)
@@ -525,15 +525,9 @@ public class LLaMa {
             return []
         }
 
-//        llama_tokenize(
-//                struct llama_context * ctx,
-//                          const char * text,
-//                                 int   text_len,
-//                         llama_token * tokens,
-//                                 int   n_max_tokens,
-//                                bool   add_bos)
         let n_tokens = Int32(input.utf8.count) + (bos == true ? 1 : 0)
         var embeddings: [llama_token] = Array<llama_token>(repeating: llama_token(), count: input.utf8.count)
+        print("### TOKENIZING: \(input)")
         let n = llama_tokenize(self.model, input, Int32(input.utf8.count), &embeddings, n_tokens, bos, true)
         if n <= 0 {
             return []
