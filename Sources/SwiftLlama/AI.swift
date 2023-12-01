@@ -62,7 +62,7 @@ public actor AI {
         }
     }
     
-    public func reinitialize(systemPrompt: String) throws {
+    public func reinitialize(systemPrompt: String?) throws {
         print("AI reinit system prompt: \(systemPrompt)")
         try model.reinitialize(systemPrompt: systemPrompt)
     }
