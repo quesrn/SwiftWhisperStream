@@ -62,9 +62,9 @@ public actor AI {
         }
     }
     
-    public func reinitializeSystemPrompt(_ prompt: String) throws {
-        print("AI reinit system prompt: \(prompt)")
-        try model.reinitializeSystemPrompt(prompt)
+    public func reinitialize(systemPrompt: String) throws {
+        print("AI reinit system prompt: \(systemPrompt)")
+        try model.reinitialize(systemPrompt: systemPrompt)
     }
     
     public func conversationHistory(allMessages messages: [(String, String)]) throws {
