@@ -410,36 +410,23 @@ public class LLaMa {
         //        llama_sample_repetition_penalty(ctx, &candidates_p,
         //                    last_n_tokens.mutPtr.advanced(by: last_n_tokens.count - Int(repeat_last_n)),
         //                    Int(repeat_last_n), repeat_penalty)
-        llama_sample_repetition_penalties(
-            ctx,
-            &candidates_p,
-            last_n_tokens.mutPtr.advanced(by: last_n_tokens.count - Int(repeat_last_n)),
-            Int(last_n_repeat),
-            repeat_penalty,
-            alpha_frequency,
-            alpha_presence)
-        if !penalize_nl {
-            logits[nl_token] = nl_logit
+        if !last_n_tokens.isEmpty {
+            llama_sample_repetition_penalties(
+                ctx,
+                &candidates_p,
+                last_n_tokens.mutPtr.advanced(by: last_n_tokens.count - Int(repeat_last_n)),
+                Int(last_n_repeat),
+                repeat_penalty,
+                alpha_frequency,
+                alpha_presence)
+            if !penalize_nl {
+                logits[nl_token] = nl_logit
+            }
         }
         
-        //        let swiftTokenCallback : (@convention(c) (Int32 ) -> String?) = {
-        //            in_token -> String? in
-        //            return self.llm_token_to_str(outputToken:in_token)
-        //        }
-        if (self.grammar != nil ) {
-            llama_sample_grammar(ctx,&candidates_p, self.grammar)
-            //             llama_sample_grammar_for_dadbed9(ctx,&candidates_p, self.grammar)
+        if grammar != nil {
+            llama_sample_grammar(ctx, &candidates_p, grammar)
         }
-        
-        //        if (self.grammar != nil) {
-        //            llama_sample_grammar(ctx,&candidates_p, self.grammar, llama_token_eos(self.model),bridge(self),
-        //                                 {(observer) -> Void in
-        //                // Extract pointer to `self` from void pointer:
-        //                let mySelf = Unmanaged.fromOpaque(observer!).takeUnretainedValue()
-        //                // Call instance method:
-        //                mySelf.TestMethod();
-        //            });
-        //        }
         
         var res_token: Int32 = 0
         
@@ -464,30 +451,33 @@ public class LLaMa {
                 llama_sample_tail_free(ctx, &candidates_p, tfs_z, 1)
                 llama_sample_typical(ctx, &candidates_p, typical_p, 1)
                 llama_sample_top_p(ctx, &candidates_p, top_p, 1)
+//                llama_sample_min_p(ctx, &candidates_p, min_p, 1) // TODO: implement
                 llama_sample_temp(ctx, &candidates_p, temp)
                 res_token = llama_sample_token(ctx, &candidates_p)
             }
         }
         
-        if self.grammar != nil {
-            llama_grammar_accept_token(ctx, self.grammar, res_token);
+        if grammar != nil {
+            llama_grammar_accept_token(ctx, grammar, res_token);
         }
         return res_token
     }
     
-    public func reinitializeSystemPrompt(_ prompt: String) throws {
+    public func reinitialize(systemPrompt: String?) throws {
         past.removeAll(keepingCapacity: true)
         nPast = 0
         
-        var inputTokens = tokenizePrompt(prompt, format: systemFormat)
-        if inputTokens.count == 0 {
-            return
+        if let prompt = systemPrompt {
+            var inputTokens = tokenizePrompt(prompt, format: systemFormat)
+            if inputTokens.count == 0 {
+                return
+            }
+            let inputTokensCount = inputTokens.count
+            if inputTokensCount > Int32(contextParams.context) {
+                throw ModelError.inputTooLong
+            }
+            past.append(inputTokens)
         }
-        let inputTokensCount = inputTokens.count
-        if inputTokensCount > Int32(contextParams.context) {
-            throw ModelError.inputTooLong
-        }
-        past.append(inputTokens)
     }
     
     // FIXME: proper context size checking incl. past tokens...
