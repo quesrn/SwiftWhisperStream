@@ -73,6 +73,7 @@ public class LLaMa {
     
     deinit {
         llama_free(context)
+        llama_batch_free(batch)
         llama_free_model(model)
         llama_backend_free()
     }
@@ -198,21 +199,25 @@ public class LLaMa {
                     throw ModelError.contextLimit
                 }
                 
-                batch.n_tokens = Int32(inputBatch.count)
-                for i1 in 0...batch.n_tokens - 1 {
-                    let i = Int(i1)
-                    batch.token[i] = inputBatch[i]
-                    batch.pos[i] = i1
-                    batch.n_seq_id[Int(i)] = 1
-                    batch.seq_id[Int(i)]![0] = 0
-                    batch.logits[i] = 0
-                }
-                batch.logits[Int(batch.n_tokens) - 1] = 1 // true
+//                batch.n_tokens = Int32(inputBatch.count)
+//                for i1 in 0...batch.n_tokens - 1 {
+//                    let i = Int(i1)
+//                    batch.token[i] = inputBatch[i]
+//                    batch.pos[i] = i1
+//                    batch.n_seq_id[Int(i)] = 1
+//                    batch.seq_id[Int(i)]![0] = 0
+//                    batch.logits[i] = 0
+//                }
+//                batch.logits[Int(batch.n_tokens) - 1] = 1 // true
+//                
+//                if llama_decode(context, batch) != 0 {
+//                    throw ModelError.failedToEval
+//                }
                 
-                if llama_decode(context, batch) != 0 {
+                if llama_eval(self.context, inputBatch.mutPtr, Int32(inputBatch.count), min(self.contextParams.context, self.nPast)) != 0 {
                     throw ModelError.failedToEval
                 }
-                
+//                }
 //                var eval_res: Bool? = nil
 //                try ExceptionCatcher.catchException {
 //                    eval_res = try? self.llm_eval(inputBatch: inputBatch)
@@ -294,30 +299,36 @@ public class LLaMa {
                 
                 // Check if we need to run another response eval
                 if outputEnabled {
-                    // Send generated token back into model for next generation
-//                    var eval_res: Bool? = nil
                     if self.nPast >= self.contextParams.context - 4 {
                         //                        self.nPast = self.nPast / 2
-                        //                        outputToken = self.llama_token_eos(self.model)
+                        outputToken = llama_token_eos(self.model)
                         //                        try ExceptionCatcher.catchException {
                         //                            _ = try? self.llm_eval(inputBatch: [outputToken])
                         //                        }
                         //                        print("Context Limit!")
-                        throw ModelError.contextLimit
+                        //                        throw ModelError.contextLimit
+                        break
                     }
+
+                    // Send generated token back into model for next generation
+//                    var eval_res: Bool? = nil
                     
-                    batch.n_tokens = 0
-                    batch.token[Int(batch.n_tokens)] = outputToken
-                    batch.pos[Int(batch.n_tokens)] = nPast
-                    batch.n_seq_id[Int(batch.n_tokens)] = 1
-                    batch.seq_id[Int(batch.n_tokens)]![0] = 0
-                    batch.logits[Int(batch.n_tokens)] = 1 // true
-                    batch.n_tokens += 1
-                    
-                    if llama_decode(context, batch) != 0 {
+//                    batch.n_tokens = 0
+//                    batch.token[Int(batch.n_tokens)] = outputToken
+//                    batch.pos[Int(batch.n_tokens)] = nPast
+//                    batch.n_seq_id[Int(batch.n_tokens)] = 1
+//                    batch.seq_id[Int(batch.n_tokens)]![0] = 0
+//                    batch.logits[Int(batch.n_tokens)] = 1 // true
+//                    batch.n_tokens += 1
+//                    
+//                    if llama_decode(context, batch) != 0 {
+//                        throw ModelError.failedToEval
+//                    }
+                    var outputBatch = [outputToken]
+                    if llama_eval(self.context, outputBatch.mutPtr, Int32(outputBatch.count), min(self.contextParams.context, self.nPast)) != 0 {
                         throw ModelError.failedToEval
                     }
-                   
+                    
 //                    try ExceptionCatcher.catchException {
 //                        eval_res = try? self.llm_eval(inputBatch: [outputToken])
 //                    }
@@ -475,6 +486,8 @@ public class LLaMa {
     public func reinitialize(systemPrompt: String?) throws {
         past.removeAll(keepingCapacity: true)
         nPast = 0
+        
+        llama_kv_cache_clear(context)
         
         if let prompt = systemPrompt {
             var inputTokens = tokenizePrompt(prompt, format: systemFormat)
