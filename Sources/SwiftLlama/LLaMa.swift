@@ -123,11 +123,11 @@ public class LLaMa {
         context_params.n_threads = UInt32(contextParams.n_threads)
         context_params.logits_all = contextParams.logitsAll
         context_params.n_batch = UInt32(contextParams.n_batch)
+        context_params.rope_freq_base = 10000.0
+        context_params.rope_freq_scale = 1
         model_params.vocab_only = contextParams.vocabOnly
         model_params.use_mlock = contextParams.useMlock
         model_params.use_mmap = contextParams.useMMap
-//        context_params.rope_freq_base = 10000.0
-//        context_params.rope_freq_scale = 1
         
         model_params.n_gpu_layers = contextParams.useMetal ? 1 : 0
         
