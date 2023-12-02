@@ -58,13 +58,15 @@ public class LLaMa {
                 try? self.load_grammar(contextParams.grammarPath!)
             }
             print(String(cString: print_system_info()))
+            
+            llm_init_logits()
 //            try ExceptionCatcher.catchException {
 //                _ = try? self.llm_init_logits()
 //            }
             //        if exception != nil{
             //            throw ModelError.failedToEval
             //        }
-//            print("Logits inited.")
+            print("Logits inited.")
         } catch {
             print(error)
             throw error
@@ -87,6 +89,11 @@ public class LLaMa {
             print(error)
             throw error
         }
+    }
+    
+    func llm_init_logits() -> Bool {
+        var inputs = [llama_token_bos(self.model), llama_token_eos(self.model)]
+        return llama_eval(self.context, inputs.mutPtr, Int32(inputs.count), min(self.contextParams.context, self.nPast)) == 0
     }
     
 //    func llm_init_logits() throws -> Bool {
