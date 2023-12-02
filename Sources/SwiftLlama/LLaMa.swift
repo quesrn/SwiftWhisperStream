@@ -257,21 +257,18 @@ public class LLaMa {
                 // Repeat tokens update
                 outputRepeatTokens.append(outputToken)
                 if outputRepeatTokens.count > params.repeat_last_n {
-                    if let first = outputRepeatTokens.first {
-                        print("AI remove first token \(token_to_piece(token: first))")
-                    }
                     outputRepeatTokens.removeFirst()
                 }
                 // Check for eos - end early - check eos before bos in case they are the same
                 if outputToken == llama_token_eos(self.model) {
                     outputEnabled = false
-                    //                    print("[EOS]")
+                    print("[EOS]")
                     break
                 }
                 // Check for bos, skip callback if so, bos = eos for most gptneox so this should typically never occur
                 var skipCallback = false
                 if outputToken == llama_token_bos(self.model) {
-                    //                    print("[BOS]")
+                    print("[BOS]")
                     skipCallback = true
                 }
                 // Convert token to string and callback
@@ -348,10 +345,22 @@ public class LLaMa {
     private func token_to_piece(token: llama_token) -> String {
         let result = UnsafeMutablePointer<Int8>.allocate(capacity: 8)
         result.initialize(repeating: Int8(0), count: 8)
-        _ = llama_token_to_piece(model, token, result, 8)
-        let resultStr = String(cString: result)
-        result.deallocate()
-        return resultStr
+        defer {
+            result.deallocate()
+        }
+        let nTokens = llama_token_to_piece(model, token, result, 8)
+        
+        if nTokens < 0 {
+            let newResult = UnsafeMutablePointer<Int8>.allocate(capacity: Int(-nTokens))
+            newResult.initialize(repeating: Int8(0), count: Int(-nTokens))
+            defer {
+                newResult.deallocate()
+            }
+            _ = llama_token_to_piece(model, token, newResult, -nTokens)
+            return String(cString: newResult)
+        } else {
+            return String(cString: result)
+        }
     }
     
     public func tokenizePrompt(_ input: String, format: String, output: String? = nil) -> [ModelToken] {
