@@ -410,19 +410,19 @@ public class LLaMa {
         //        llama_sample_repetition_penalty(ctx, &candidates_p,
         //                    last_n_tokens.mutPtr.advanced(by: last_n_tokens.count - Int(repeat_last_n)),
         //                    Int(repeat_last_n), repeat_penalty)
-//        if !last_n_tokens.isEmpty {
-//            llama_sample_repetition_penalties(
-//                ctx,
-//                &candidates_p,
-//                last_n_tokens.mutPtr.advanced(by: last_n_tokens.count - Int(repeat_last_n)),
-//                Int(last_n_repeat),
-//                repeat_penalty,
-//                alpha_frequency,
-//                alpha_presence)
-//            if !penalize_nl {
-//                logits[nl_token] = nl_logit
-//            }
-//        }
+        if !last_n_tokens.isEmpty {
+            llama_sample_repetition_penalties(
+                ctx,
+                &candidates_p,
+                last_n_tokens.mutPtr.advanced(by: last_n_tokens.count - Int(repeat_last_n)),
+                Int(last_n_repeat),
+                repeat_penalty,
+                alpha_frequency,
+                alpha_presence)
+            if !penalize_nl {
+                logits[nl_token] = nl_logit
+            }
+        }
         
         if grammar != nil {
             llama_sample_grammar(ctx, &candidates_p, grammar)
