@@ -417,7 +417,8 @@ public class LLaMa {
         
         //
         let vocabSize = llama_n_vocab(model)
-        guard let logits = llama_get_logits_ith(context, batch.n_tokens - 1) else {
+//        guard let logits = llama_get_logits_ith(context, batch.n_tokens - 1) else {
+        guard let logits = llama_get_logits(context) else {
             print("GPT sample error logits nil")
             return 0
         }
