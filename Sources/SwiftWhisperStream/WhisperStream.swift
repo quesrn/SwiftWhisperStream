@@ -27,6 +27,8 @@ public class WhisperStream: Thread {
     @Published public var isMuted = false
     private var streamContext: stream_context_t?
 
+    var isDeactivating = false
+    
     let waiter = DispatchGroup()
     
     let model: URL
@@ -73,6 +75,7 @@ public class WhisperStream: Thread {
     }
 
     public override func start() {
+        isDeactivating = false
         waiter.enter()
         super.start()
     }
@@ -87,7 +90,9 @@ public class WhisperStream: Thread {
     }
 
     public func deactivate() {
+        isDeactivating = true
         cancel()
+        deactivationCleanup()
     }
     
     func task() {
@@ -203,14 +208,9 @@ public class WhisperStream: Thread {
                     }
                 }
                 
-                device?.deactivateVAD()
-                device?.close()
-                clearAudio()
-                if let streamContext = streamContext {
-                    stream_free(streamContext)
+                if isDeactivating {
+                    deactivationCleanup()
                 }
-                streamContext = nil
-                alive = false
             }
         }
     }
@@ -235,6 +235,21 @@ public class WhisperStream: Thread {
 //        segments.removeFirst(k)
 
         return 0
+    }
+    
+    func deactivationCleanup() {
+        closeDevice()
+        clearAudio()
+        if let streamContext = streamContext {
+            stream_free(streamContext)
+        }
+        streamContext = nil
+        alive = false
+    }
+    
+    func closeDevice() {
+        device?.deactivateVAD()
+        device?.close()
     }
     
     public func clearAudio() {
