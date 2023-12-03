@@ -208,7 +208,7 @@ public class WhisperStream: Thread {
                     }
                 }
                 
-                if isDeactivating {
+                if !isDeactivating {
                     deactivationCleanup()
                 }
             }
