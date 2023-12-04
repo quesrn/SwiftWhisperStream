@@ -26,8 +26,6 @@ public class WhisperStream: Thread {
     @Published public private(set) var alive = true
     @Published public var isMuted = false
     private var streamContext: stream_context_t?
-
-    var isDeactivating = false
     
     let waiter = DispatchGroup()
     
@@ -75,7 +73,6 @@ public class WhisperStream: Thread {
     }
 
     public override func start() {
-        isDeactivating = false
         waiter.enter()
         super.start()
     }
@@ -90,9 +87,7 @@ public class WhisperStream: Thread {
     }
 
     public func deactivate() {
-        isDeactivating = true
         cancel()
-        deactivationCleanup()
     }
     
     func task() {
@@ -173,7 +168,7 @@ public class WhisperStream: Thread {
                     return
                 }
                 
-                while !isCancelled && !isDeactivating {
+                while !isCancelled {
                     let errno = stream_run(ctx, Unmanaged.passUnretained(self).toOpaque()) { text, t0, t1, startTime, myself in
                         var resultText = text
                         let stream = Unmanaged<WhisperStream>.fromOpaque(myself!).takeUnretainedValue()
@@ -208,9 +203,7 @@ public class WhisperStream: Thread {
                     }
                 }
                 
-                if !isDeactivating {
-                    deactivationCleanup()
-                }
+                deactivationCleanup()
             }
         }
     }
