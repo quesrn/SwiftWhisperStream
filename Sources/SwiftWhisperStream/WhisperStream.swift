@@ -173,7 +173,7 @@ public class WhisperStream: Thread {
                     return
                 }
                 
-                while !isCancelled {
+                while !isCancelled && !isDeactivating {
                     let errno = stream_run(ctx, Unmanaged.passUnretained(self).toOpaque()) { text, t0, t1, startTime, myself in
                         var resultText = text
                         let stream = Unmanaged<WhisperStream>.fromOpaque(myself!).takeUnretainedValue()
