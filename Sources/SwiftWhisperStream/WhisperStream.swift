@@ -58,6 +58,8 @@ public class WhisperStream: Thread {
 //        self.window = window
         self.suppressNonSpeechOutput = suppressNonSpeechOutput
         self.language = language?.lowercased() ?? ""
+        self.vad = VAD()
+        print("MAde VAD: \(self.vad)")
         
         super.init()
         
