@@ -87,6 +87,7 @@ public class WhisperStream: Thread {
     }
 
     public func deactivate() {
+        device?.deactivateVAD()
         cancel()
     }
     
