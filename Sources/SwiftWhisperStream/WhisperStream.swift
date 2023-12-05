@@ -94,13 +94,12 @@ public class WhisperStream: Thread {
     }
     
     public var isActivated: Bool {
-        return alive && (device?.vad?.isMicrophoneActive ?? false) && streamContext != nil
+        return alive && (vad?.isMicrophoneActive ?? false) && streamContext != nil
     }
     
     func task() {
-        vad?.activateMicrophone()
-
-        guard let vad = device?.vad else { return }
+        guard let vad = vad else { return }
+        vad.activateMicrophone()
         
         language.withCString { languageCStr in
             model.path.withCString { modelCStr in
@@ -183,12 +182,12 @@ public class WhisperStream: Thread {
                         var resultText = text
                         let stream = Unmanaged<WhisperStream>.fromOpaque(myself!).takeUnretainedValue()
                         if stream.isMuted {
-                            stream.device?.vad?.removeAllSpeechDetectionRanges()
+                            stream.vad?.removeAllSpeechDetectionRanges()
                             resultText = nil
                         } else {
-                            stream.device?.vad?.removeSpeechDetectionRanges(startTime: startTime, t0: t0, t1: t1)
+                            stream.vad?.removeSpeechDetectionRanges(startTime: startTime, t0: t0, t1: t1)
                             var speechCoverage: Int64 = 0
-                            let speechDetectedAt = stream.device?.vad?.speechDetectedAt ?? []
+                            let speechDetectedAt = stream.vad?.speechDetectedAt ?? []
                             for pair in speechDetectedAt {
                                 let speech0 = max(0, pair.0 - startTime) / 1000
                                 let speech1 = max(0, pair.1 - startTime) / 1000
