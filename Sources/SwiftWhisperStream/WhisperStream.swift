@@ -29,7 +29,7 @@ public class WhisperStream: Thread {
     
     let waiter = DispatchGroup()
     
-    let vad = VAD()
+    public let vad = VAD()
     
     let model: URL
     let device: CaptureDevice?
