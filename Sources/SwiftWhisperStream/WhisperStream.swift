@@ -91,7 +91,7 @@ public class WhisperStream: Thread {
     }
     
     public var isActivated: Bool {
-        return alive && device?.vad?.isMicrophoneActive && streamContext != nil
+        return alive && (device?.vad?.isMicrophoneActive ?? false) && streamContext != nil
     }
     
     func task() {
