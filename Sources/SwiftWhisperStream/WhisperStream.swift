@@ -86,7 +86,8 @@ public class WhisperStream: Thread {
         waiter.wait()
     }
 
-    public func deactivate() {
+    public func deactivate() {                
+        print("STREAM deactivate")
         device?.deactivateVAD()
         cancel()
     }
@@ -96,6 +97,7 @@ public class WhisperStream: Thread {
     }
     
     func task() {
+        print("STREAM task() start")
         device?.activateVAD()
         guard let vad = device?.vad else { return }
         
@@ -111,11 +113,13 @@ public class WhisperStream: Thread {
                     params.capture_id = device.id
                 }
                 
+                print("STREAM task() gettin goin")
                 guard !isCancelled else {
                     alive = false
                     device?.deactivateVAD()
                     return
                 }
+                print("STREAM task() gettin goin 2")
                 
                 // Use the class-level lock to ensure only one instance initializes stream at a time
                 WhisperStream.streamInitLock.lock()
@@ -208,6 +212,7 @@ public class WhisperStream: Thread {
                     }
                 }
                 
+                print("STREAM task() ended, will clean up now")
                 deactivationCleanup()
             }
         }
