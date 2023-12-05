@@ -64,7 +64,9 @@ public class WhisperStream: Thread {
         
 #if os(iOS)
         resignObserver = NotificationCenter.default.addObserver(forName: UIScene.willDeactivateNotification, object: nil, queue: nil) { [weak self] _ in
-            self?.deactivate()
+            Task { @MainActor [weak self] in
+                self?.deactivate()
+            }
         }
 #endif
     }
@@ -89,7 +91,8 @@ public class WhisperStream: Thread {
         waiter.wait()
     }
 
-    public func deactivate() {                
+    @MainActor
+    public func deactivate() {
         vad?.deactivateMicrophone()
         cancel()
     }
