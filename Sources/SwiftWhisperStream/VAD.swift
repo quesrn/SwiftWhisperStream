@@ -14,7 +14,7 @@ public class VAD: ObservableObject {
     let aggressiveness: Int32
     let samples: UInt16 = 160
    
-    var isMicrophoneActive = false
+    @Published public var isMicrophoneActive = false
     
     private let audioDataQueue = DispatchQueue(label: "VAD-AudioDataQueue")
     private var audioFrameBuffer: [Int16] = []
