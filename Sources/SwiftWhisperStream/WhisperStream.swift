@@ -90,6 +90,10 @@ public class WhisperStream: Thread {
         cancel()
     }
     
+    public var isActivated: Bool {
+        return alive && device?.vad?.isMicrophoneActive && streamContext != nil
+    }
+    
     func task() {
         device?.activateVAD()
         guard let vad = device?.vad else { return }
