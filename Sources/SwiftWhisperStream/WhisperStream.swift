@@ -29,6 +29,8 @@ public class WhisperStream: Thread {
     
     let waiter = DispatchGroup()
     
+    let vad = VAD()
+    
     let model: URL
     let device: CaptureDevice?
 //    let window: TimeInterval
@@ -87,8 +89,7 @@ public class WhisperStream: Thread {
     }
 
     public func deactivate() {                
-        print("STREAM deactivate")
-        device?.deactivateVAD()
+        vad?.deactivateMicrophone()
         cancel()
     }
     
@@ -97,8 +98,8 @@ public class WhisperStream: Thread {
     }
     
     func task() {
-        print("STREAM task() start")
-        device?.activateVAD()
+        vad?.activateMicrophone()
+
         guard let vad = device?.vad else { return }
         
         language.withCString { languageCStr in
@@ -116,7 +117,7 @@ public class WhisperStream: Thread {
                 print("STREAM task() gettin goin")
                 guard !isCancelled else {
                     alive = false
-                    device?.deactivateVAD()
+                    vad.deactivateMicrophone()
                     return
                 }
                 print("STREAM task() gettin goin 2")
@@ -251,7 +252,7 @@ public class WhisperStream: Thread {
     }
     
     func closeDevice() {
-        device?.deactivateVAD()
+        vad?.deactivateMicrophone()
         device?.close()
     }
     

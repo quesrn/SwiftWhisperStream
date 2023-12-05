@@ -10,8 +10,6 @@ public struct CaptureDevice: Identifiable {
     public let id: Int32
     public let name: String
     
-    public let vad = VAD()
-    
     public init(id: Int32, name: String) {
         self.id = id
         self.name = name
@@ -39,14 +37,6 @@ public struct CaptureDevice: Identifiable {
     
     public func close() {
         SDL_CloseAudioDevice(SDL_AudioDeviceID(id))
-    }
-    
-    func activateVAD() {
-        vad?.activateMicrophone()
-    }
-    
-    func deactivateVAD() {
-        vad?.deactivateMicrophone()
     }
 }
 
