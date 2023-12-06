@@ -42,6 +42,8 @@ public class LLaMa {
     //var n_history: Int32 = 0
     var nPast: Int32 = 0
     
+    private var temporaryInvalidCChars = [CChar]()
+    
     public init(path: String, contextParams: ModelAndContextParams = .default) throws {
         self.contextParams = contextParams
         self.batch = llama_batch_init(512, 0, 1)
@@ -287,11 +289,22 @@ public class LLaMa {
                 //                self.session_tokens.append(outputToken)
                 
                 if !skipCallback {
-                    let str = token_to_piece(token: outputToken)
-                    output += str
+//                    let str = String(cString: token_to_piece(token: outputToken) + [0])
+                    let newTokenCChars = token_to_piece(token: outputToken)
+                    temporaryInvalidCChars.append(contentsOf: newTokenCChars)
+                    var newTokenStr = ""
+                    if let str = String(validatingUTF8: temporaryInvalidCChars + [0]) {
+                        temporaryInvalidCChars.removeAll()
+                        newTokenStr = str
+                    } else if (0..<temporaryInvalidCChars.count).contains(where: { $0 != 0 && String(validatingUTF8: Array(temporaryInvalidCChars.suffix($0)) + [0])  != nil }) {
+                        let str = String(cString: temporaryInvalidCChars + [0])
+                        temporaryInvalidCChars.removeAll()
+                        newTokenStr = str
+                    }
+                    output += newTokenStr
                     // Per token callback
                     let (incrementalStr, time) = Utils.time {
-                        return str
+                        return newTokenStr
                     }
                     let (check, processedTextSoFar) = await callback(incrementalStr, output, time)
                     output = processedTextSoFar
@@ -360,7 +373,7 @@ public class LLaMa {
         }
     }
    
-    private func token_to_piece(token: llama_token) -> String {
+    private func token_to_piece(token: llama_token) -> [CChar] {
         let result = UnsafeMutablePointer<Int8>.allocate(capacity: 8)
         result.initialize(repeating: Int8(0), count: 8)
         defer {
@@ -374,10 +387,14 @@ public class LLaMa {
             defer {
                 newResult.deallocate()
             }
-            _ = llama_token_to_piece(model, token, newResult, -nTokens)
-            return String(cString: newResult)
+//            _ = llama_token_to_piece(model, token, newResult, -nTokens)
+//            return String(cString: newResult)
+            let nNewTokens = llama_token_to_piece(model, token, newResult, -nTokens)
+            let bufferPointer = UnsafeBufferPointer(start: newResult, count: Int(nNewTokens))
+            return Array(bufferPointer)
         } else {
-            return String(cString: result)
+            let bufferPointer = UnsafeBufferPointer(start: result, count: Int(nTokens))
+            return Array(bufferPointer)
         }
     }
     
@@ -462,7 +479,7 @@ public class LLaMa {
             // Greedy sampling
             res_token = llama_sample_token_greedy(ctx, &candidates_p)
         } else {
-            var class_name = String(describing: self)
+            let class_name = String(describing: self)
             // Mirostat currently unused...
             if mirostat == 1 {
                 var mirostat_mu: Float = 2.0 * mirostat_tau
@@ -494,11 +511,12 @@ public class LLaMa {
     public func reinitialize(systemPrompt: String?) throws {
         past.removeAll(keepingCapacity: true)
         nPast = 0
+        temporaryInvalidCChars.removeAll()
         
         llama_kv_cache_clear(context)
         
         if let prompt = systemPrompt {
-            var inputTokens = tokenizePrompt(prompt, format: systemFormat)
+            let inputTokens = tokenizePrompt(prompt, format: systemFormat)
             if inputTokens.count == 0 {
                 return
             }
@@ -573,4 +591,3 @@ public class LLaMa {
         return embeddings
     }
 }
-
