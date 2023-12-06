@@ -31,7 +31,7 @@ public class WhisperStream: Thread {
     
     @Published public var vad: VAD?
     
-    let model: URL
+    public let modelFile: URL
     let device: CaptureDevice?
 //    let window: TimeInterval
     let suppressNonSpeechOutput: Bool
@@ -53,7 +53,7 @@ public class WhisperStream: Thread {
     }
     
     public init(model: URL, device: CaptureDevice? = nil/*, window: TimeInterval = (60 * 5)*/, suppressNonSpeechOutput: Bool = false, language: String? = nil) {
-        self.model = model
+        self.modelFile = model
         self.device = device
 //        self.window = window
         self.suppressNonSpeechOutput = suppressNonSpeechOutput
@@ -106,7 +106,7 @@ public class WhisperStream: Thread {
         vad.activateMicrophone()
         
         language.withCString { languageCStr in
-            model.path.withCString { modelCStr in
+            modelFile.path.withCString { modelCStr in
                 var params = stream_default_params()
                 params.model = modelCStr
                 params.language = languageCStr
