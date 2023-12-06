@@ -79,7 +79,8 @@ public class VAD: ObservableObject {
             for i in 0..<count {
                 let sample = frames[i]
                 // Perform the conversion, you might need to adjust this based on your specific requirements
-                let int16Sample = Int16(sample * Float32(Int16.max))
+                #warning("TODO: This was AI-generated and crashed until clamped to Int16 max; replace with proper logic even though it appears to work alright")
+                let int16Sample = Int16(min(Float(Int16.max), sample * Float32(Int16.max)))
                 int16Frames.append(int16Sample)
             }
             
