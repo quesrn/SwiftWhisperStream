@@ -61,6 +61,7 @@ public class LLaMa {
             }
             print(String(cString: print_system_info()))
             
+            // TODO: Needed?
             llm_init_logits()
 //            try ExceptionCatcher.catchException {
 //                _ = try? self.llm_init_logits()
