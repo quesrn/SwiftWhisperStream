@@ -117,13 +117,11 @@ public class WhisperStream: Thread {
                     params.capture_id = device.id
                 }
                 
-                print("STREAM task() gettin goin")
                 guard !isCancelled else {
                     alive = false
                     vad.deactivateMicrophone()
                     return
                 }
-                print("STREAM task() gettin goin 2")
                 
                 // Use the class-level lock to ensure only one instance initializes stream at a time
                 WhisperStream.streamInitLock.lock()
