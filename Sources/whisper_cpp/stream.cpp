@@ -196,8 +196,13 @@ int stream_run(stream_context *ctx, void *callback_ctx, stream_callback_t callba
     wparams.speed_up = params.speed_up;
 
     // disable temperature fallback
-    wparams.temperature_inc = -1.0f;
-
+//    wparams.temperature_inc = -1.0f;
+    // https://github.com/ggerganov/whisper.cpp/issues/1017
+    wparams.temperature_inc = 0.1f;
+    wparams.beam_search.beam_size = 5;
+    wparams.entropy_thold = 2.8f;
+    wparams.n_max_text_ctx = 64;
+    
     wparams.prompt_tokens = params.no_context ? nullptr : ctx->prompt_tokens.data();
     wparams.prompt_n_tokens = params.no_context ? 0 : ctx->prompt_tokens.size();
 
