@@ -46,7 +46,7 @@ public class WhisperStream: Thread {
     
     public static var canUseGPU: Bool {
 #if os(iOS)
-        return MTLCreateSystemDefaultDevice()?.supportsFamily(.apple4) ?? false
+        return MTLCreateSystemDefaultDevice()?.supportsFamily(.apple7) ?? false
 #else
         return MTLCreateSystemDefaultDevice()?.supportsFamily(.mac2) ?? false
 #endif
